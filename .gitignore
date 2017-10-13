@@ -4,34 +4,103 @@ build-*/
 *-build/
 qtcreator-build
 .DS_Store
-src/gwt/www/js/acesupport.js
-src/gwt/www/js/ace.js
-src/gwt/src/org/rstudio/studio/client/workbench/views/source/editors/text/ace/acesupport.js
-src/gwt/src/org/rstudio/core/client/jsonrpc/json2.min.js
-src/gwt/www/js/json2.min.js
-src/gwt/tools/ace/
-src/gwt/tools/pdfjs/
-src/gwt/tools/xterm.js/
-src/gwt/.ant-targets-build.xml
-/src/gwt/.gwt/.gwt-log
-.Rproj.user
+
+
+## MacOS
+
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+## R
+
+# History files
 .Rhistory
+.Rapp.history
+
+# Session Data files
 .RData
-.Rprofile
-/src/gwt/bin.test/
-/src/gwt/gwt-unitCache/
-NEWS.html
-CONTRIBUTING.html
-CMakeLists.txt.user
-.idea/
-**/\.tern-port
-.#*
-*.autosave
-*~
-*swp
-.orig
-.vagrant
-tags
-GPATH
-GRTAGS
-GTAGS
+
+# Example code in package build process
+*-Ex.R
+
+# Output files from R CMD build
+/*.tar.gz
+
+# Output files from R CMD check
+/*.Rcheck/
+
+# RStudio files
+.Rproj.user/
+
+# produced vignettes
+vignettes/*.html
+vignettes/*.pdf
+
+# OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
+.httr-oauth
+
+# knitr and R markdown default cache directories
+/*_cache/
+/cache/
+
+# Temporary files created by R markdown
+*.utf8.md
+*.knit.md
+
+## STATA
+
+# .gitignore file for git projects containing Stata files
+# Commercial statistical software: http://www.stata.com
+
+# Stata dataset and output files
+*.dta
+*.gph
+*.log
+*.smcl
+*.stpr
+*.stsem
+
+# Graphic export files from Stata
+# Stata command graph export: http://www.stata.com/manuals14/g-2graphexport.pdf
+
+You may add graphic export files to your .gitignore. However you should be
+aware that this will exclude all image files from this main directory
+and subdirectories.
+*.ps
+*.eps
+*.wmf
+*.emf
+*.pdf
+*.png
+*.tif
+
+
+## ORIGINAL
+
+/00_original_data/
+/01_pdfs/
