@@ -6,10 +6,11 @@
 #' @param heterogenous Covariate(s) to interact with treatment(s) specified as character vector.
 #' @param subset character string specifing logical expression for subsetting.
 #' @param FE Fixed effects covariate(s) specified as character vector.
-#' @param cluster Covariate for clustered robust standard errors as defined by multiwayvcov::cluster.vcov() function. Currently only one clustering variable option supported specified as character vector.
+#' @param cluster Covariate for clustered robust standard errors as defined by \code{multiwayvcov::cluster.vcov()} function. Currently only one clustering variable option supported specified as character vector.
 #' @param IPW Inverse probability weights specified as character vector.
 #' @param data Data frame which contains all the relevant variables.
 #' @param model Character string specifying the model to estimate. Currently only "lm" and "logit" is supported. Default is "lm".
+#' @param margin_at Character string which should be in the format of \code{'var_name = value'}, defaults to NULL (no marginal effects). This calculates the marginal effects of the \code{treat} variable in Logit and Probit models at these particular levels. Takes only binary variables.
 #' @param status Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.
 #' @return List of three objects. \code{estimates} is estimates from the model and corresponding standard errors. \code{stat} is vector of adjusted R squared and number of observations. \code{model_spec} is logical vector of characteristics of the model.
 #' @examples
@@ -44,6 +45,7 @@ analyses <- function(DV,
                      IPW = NULL,
                      data,
                      model = "lm",
+                     margin_at = NULL,
                      status = c(TRUE, TRUE, TRUE)) {
 
   # required packages
@@ -51,8 +53,6 @@ analyses <- function(DV,
   requireNamespace("dplyr", quietly = TRUE)
   requireNamespace("broom", quietly = TRUE)
   requireNamespace("Hmisc", quietly = TRUE)
-  requireNamespace("lfe", quietly = TRUE)
-  requireNamespace("multiwayvcov", quietly = TRUE)
   requireNamespace("lmtest", quietly = TRUE)
 
   if (!is.null(FE) & model != "lm")
@@ -80,34 +80,77 @@ analyses <- function(DV,
                                            collapse = " & "))
   frame_df <- stats::model.frame(frame_formula, data = frame_df)
 
-  if (length(FE) > 1)
-    frame_df[, FE] <- (plyr::colwise(as.factor))(frame_df[,
-                                                          FE])
-  if (length(FE) == 1)
-    frame_df[, FE] <- as.factor(frame_df[, FE])
+  if (length(FE) > 1) frame_df[, FE] <- (plyr::colwise(as.factor))(frame_df[, FE])
+  if (length(FE) == 1) frame_df[, FE] <- as.factor(frame_df[, FE])
+
+  ## ESTIMATION
 
   if (model == "lm") {
 
-    if (is.null(IPW)) {
-      fit <- lfe::felm(formula = fit_formula, data = frame_df)
-    } else {
-      fit <- lfe::felm(formula = fit_formula, data = frame_df,
-                       weights = unlist(frame_df[, IPW]))
-    }
-  } else if (model == "logit") {
+    requireNamespace("lfe", quietly = TRUE)
 
     if (is.null(IPW)) {
-      fit <- suppressWarnings(stats::glm(formula = stats::as.formula(main_formula),
-                                         data = frame_df, family = binomial(link = "logit")))
+      fit <-
+        suppressWarnings(
+          lfe::felm(formula = fit_formula,
+                    data = frame_df))
     } else {
-      fit <- suppressWarnings(stats::glm(formula = stats::as.formula(main_formula),
-                                         data = frame_df, weights = unlist(frame_df[,IPW]),
-                                         family = binomial(link = "logit")))
+      fit <-
+        suppressWarnings(
+          lfe::felm(formula = fit_formula,
+                    data = frame_df,
+                    weights = unlist(frame_df[, IPW]))
+        )
     }
+  } else if (any(!is.null(heterogenous), !is.null(FE))) {
+    stop("Logit and Probit models with hetorogenous or fixed effects are not supported (YET!).")
+  } else if (is.null(heterogenous)) {
+    if (model %in% c("logit", "probit")) {
 
-    if (!is.null(cluster)) {
-      fit <- lmtest::coeftest(x = fit, vcov = multiwayvcov::cluster.vcov(model = fit,
-                                                                         cluster = frame_df[, cluster]))
+      requireNamespace("multiwayvcov", quietly = TRUE)
+      requireNamespace("modmarg", quietly = TRUE)
+
+      fit <-
+        suppressWarnings(
+          stats::glm(formula = stats::as.formula(main_formula),
+                     data = frame_df,
+                     family = binomial(link = model),
+                     weights =
+                       if (!is.null(IPW)) unlist(frame_df[, IPW]))
+        )
+
+
+      if (is.null(margin_at)) {
+
+        fit <-
+          suppressWarnings(
+            lmtest::coeftest(fit,
+                             vcov =
+                               if (!is.null(cluster))
+                                 suppressWarnings(
+                                   multiwayvcov::cluster.vcov(model = fit, cluster = frame_df[, cluster]))
+            )
+          )
+
+      } else if (!is.null(margin_at)) {
+
+        fit <-
+          suppressWarnings(
+            modmarg::marg(mod = fit,
+                          var_interest = treat,
+                          type = "effects",
+                          vcov_mat =
+                            if (!is.null(cluster))
+                              suppressWarnings(
+                                multiwayvcov::cluster.vcov(model = fit, cluster = frame_df[, cluster]))
+            )
+          )
+
+        fit <- fit[[1]][fit[[1]]$Label == margin_at, c("Label", "Margin", "Standard.Error", "P.Value")]
+        colnames(fit) <- c("term", "estimate", "std.error", "p.value")
+
+      }
+
     }
   }
   col_names <- c("term", "estimate", "std.error", "p.value")
@@ -123,7 +166,12 @@ analyses <- function(DV,
   #         col_names]))
   # }
   # else {
-  estout <- broom::tidy(fit)[, col_names]
+
+  if ((model %in% c("logit", "probit")) & !is.null(margin_at)) {
+    estout <- fit
+  } else {
+    estout <- broom::tidy(fit)[, col_names]
+  }
   # estout[1, 1] <- "intercept"
   # }
 
@@ -147,9 +195,8 @@ analyses <- function(DV,
 
   list(estimates = out,
        stat = c(adj.r.squared =
-                  ifelse(model ==
-                           "lm", fround(broom::glance(fit)$adj.r.squared, digits = 3),
-                         NA), n_obs = fround(nrow(frame_df), digits = 0)),
+                  ifelse(model == "lm", fround(broom::glance(fit)$adj.r.squared, digits = 3), NA),
+                n_obs = fround(nrow(frame_df), digits = 0)),
        model_spec = c(HETEROGENOUS =
                         ifelse(!is.null(heterogenous),
                                paste(heterogenous, collapse = " "), NA),

@@ -6,7 +6,7 @@
 \usage{
 analyses(DV, treat, covs = NULL, heterogenous = NULL, subset = NULL,
   FE = NULL, cluster = NULL, IPW = NULL, data, model = "lm",
-  status = c(TRUE, TRUE, TRUE))
+  margin_at = NULL, status = c(TRUE, TRUE, TRUE))
 }
 \arguments{
 \item{DV}{Dependent variable specified as character.}
@@ -21,13 +21,15 @@ analyses(DV, treat, covs = NULL, heterogenous = NULL, subset = NULL,
 
 \item{FE}{Fixed effects covariate(s) specified as character vector.}
 
-\item{cluster}{Covariate for clustered robust standard errors as defined by multiwayvcov::cluster.vcov() function. Currently only one clustering variable option supported specified as character vector.}
+\item{cluster}{Covariate for clustered robust standard errors as defined by \code{multiwayvcov::cluster.vcov()} function. Currently only one clustering variable option supported specified as character vector.}
 
 \item{IPW}{Inverse probability weights specified as character vector.}
 
 \item{data}{Data frame which contains all the relevant variables.}
 
 \item{model}{Character string specifying the model to estimate. Currently only "lm" and "logit" is supported. Default is "lm".}
+
+\item{margin_at}{Character string which should be in the format of \code{'var_name = value'}, defaults to NULL (no marginal effects). This calculates the marginal effects of the \code{treat} variable in Logit and Probit models at these particular levels. Takes only binary variables.}
 
 \item{status}{Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.}
 }
