@@ -28,13 +28,15 @@ analyses(.DV, .treat, .covs = NULL, .heterogenous = NULL, .subset = NULL,
 
 \item{.data}{Data frame which contains all the relevant variables.}
 
-\item{.model}{Character string specifying the model to estimate. Currently only "lm" and "logit" is supported. Default is "lm".}
+\item{.model}{Character string specifying the model to estimate. Currently only "lm" and "logit"/"probit" and "ologit"/"oprobit" is supported. Default is "lm".}
 
 \item{.treat_only}{Logical vector of length 1, specifying whether only \code{.treat} estimates should be reported. Defaults to \code{FALSE}.}
 
 \item{.margin_at}{Character string which should be in the format of \code{'var_name = value'}, defaults to NULL (no marginal effects). This calculates the marginal effects of the \code{.treat} variable in Logit and Probit models at these particular levels. Takes only binary variables.}
 
 \item{.status}{Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.}
+
+\item{.stars}{If \code{FALSE} no stars are passed to printout.}
 }
 \value{
 List of three objects. \code{estimates} is estimates from the model and corresponding standard errors. \code{stat} is vector of adjusted R squared and number of observations. \code{model_spec} is logical vector of characteristics of the model.

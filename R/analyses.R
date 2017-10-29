@@ -13,6 +13,7 @@
 #' @param .margin_at Character string which should be in the format of \code{'var_name = value'}, defaults to NULL (no marginal effects). This calculates the marginal effects of the \code{.treat} variable in Logit and Probit models at these particular levels. Takes only binary variables.
 #' @param .treat_only Logical vector of length 1, specifying whether only \code{.treat} estimates should be reported. Defaults to \code{FALSE}.
 #' @param .status Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.
+#' @param .stars If \code{FALSE} no stars are passed to printout.
 #' @return List of three objects. \code{estimates} is estimates from the model and corresponding standard errors. \code{stat} is vector of adjusted R squared and number of observations. \code{model_spec} is logical vector of characteristics of the model.
 #' @examples
 #' \dontrun{
@@ -86,13 +87,12 @@ analyses <- function(.DV,
   fit_formula <- stats::as.formula(paste(main_formula, "|",
                                          FE_formula, "|", 0, "|", cluster_formula))
 
-  frame_df <- dplyr::filter_(.data = .data, .dots = .subset)
-  frame_df <- dplyr::filter_(.data = frame_df,
-                             .dots =
+  frame_df <- eval(parse(text = paste0("dplyr::filter(.data = .data, ", .subset, ")")))
+  frame_df <- eval(parse(text = paste0("dplyr::filter(.data = frame_df, ",
                                paste(
                                  paste0("!is.na(",
                                         c(.treat, .DV, .FE, .cluster, .IPW, .heterogenous), ")"),
-                                 collapse = " & "))
+                                 collapse = " & "), ")" )))
   frame_df <- stats::model.frame(frame_formula, data = frame_df)
 
   if (length(.FE) > 1) frame_df[, .FE] <- (plyr::colwise(as.factor))(frame_df[, .FE])

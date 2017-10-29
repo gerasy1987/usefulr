@@ -25,13 +25,17 @@ ocme_mod <- function(w,
   }
   lev <- w$lev
   J <- length(lev)
-  x.name <- attr(x = w$terms, which = "term.labels")
-  x2 <- w$model[, x.name]
-  colnames(x2) <- x.name
-  ww <- paste("~ -1", paste("+", x.name, collapse = " "), collapse = " ")
-  x <- stats::model.matrix(as.formula(ww), data = as.data.frame(x2))
+  # x.name <- attr(x = w$terms, which = "term.labels")
+  # x2 <- w$model[, x.name]
+  # colnames(x2) <- c("vs", "carb")
+  # # ww <- paste("~ -1", paste("+", x.name, collapse = " "), collapse = " ")
+  x <- stats::model.matrix(w)
+  x.name <- colnames(x)[-1]
   x.bar <- as.matrix(colMeans(x))
   b.est <- as.matrix(stats::coef(w))
+
+  x.bar <- as.matrix(x.bar[rownames(x.bar) %in% rownames(b.est),1])
+
   K <- nrow(b.est)
   xb <- as.vector(t(x.bar) %*% b.est)
   z <- c(-10^6, w$zeta, 10^6)
@@ -76,7 +80,7 @@ ocme_mod <- function(w,
     se[, j] <- sqrt(diag(cova))
   }
   colnames(se) <- paste("SE", lev, sep = ".")
-  rownames(se) <- colnames(x)
+  rownames(se) <- x.name
   if (rev.dum) {
     for (k in 1:K) {
       if (identical(sort(unique(x[, k])), c(0, 1))) {
