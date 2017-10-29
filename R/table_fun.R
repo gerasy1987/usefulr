@@ -74,24 +74,25 @@ table_fun <- function(.table_list,
     if (length(.col_names) > 1)
       stop("Mismatch in length of col_names and number of columns in table_list")
     .est_tab <- .table_list$estimates[, "printout"]
-    .stat_tab <- unname(.table_list$stat[c(2, 1)])
-    .spec_tab <- unname(.table_list$model_spec[2:4])
+
+    .stat_tab <- unname(.table_list$stat[ifelse(is.na(.table_list$stat[1]), 2, c(2, 1))])
+    .spec_tab <- unname(.table_list$model_spec[c(1,3:5)])
     # .status_tab <- unname(.table_list$model_status[1:3])
     .out_tab <- as.matrix(c(.est_tab, .stat_tab, .spec_tab))
   } else {
     if (length(.col_names) != dim(.table_list)[2])
       stop("Mismatch in length of col_names and number of columns in table_list")
+
     .est_tab <- as.matrix(suppressWarnings(base::Reduce(f = function(dtf1,
                                                                      dtf2) {
       base::merge(dtf1, dtf2, by = "term", all = T, suffixes = c(1:10),
                   sort = F)
-    }, x = lapply(X = .table_list["estimates", ], FUN = function(x) x[,
-                                                                      c("term", "printout")]))))
+    }, x = lapply(X = .table_list["estimates", ], FUN = function(x) x[,c("term", "printout")]))))
     .est_tab <- .est_tab[, -1]
     .stat_tab <- unname(base::Reduce(f = function(x, y)
-      cbind(x,y), x = lapply(X = .table_list["stat", ], FUN = function(x) x[c(2,1)])))
+      cbind(x,y), x = lapply(X = .table_list["stat", ], FUN = function(x) x[ifelse(is.na(x[1]), 2, c(2, 1))])))
     .spec_tab <- unname(base::Reduce(f = function(x, y)
-      cbind(x, y), x = lapply(X = .table_list["model_spec", ], FUN = function(x) x[2:4])))
+      cbind(x, y), x = lapply(X = .table_list["model_spec", ], FUN = function(x) x[c(1, 3:5)])))
     # .status_tab <- unname(base::Reduce(f = function(x, y) cbind(x,
     #     y), x = lapply(X = .table_list["model_status", ],
     #     FUN = function(x) x[1:3])))
@@ -101,15 +102,16 @@ table_fun <- function(.table_list,
   if (.type %in% c("markdown", "latex"))
     .col_names <- gsub(pattern = "\\\n", replacement = " ",
                        x = .col_names, fixed = TRUE)
+
   colnames(.out_tab) <- .col_names
 
   if (.type == "html")
     .out_tab <- gsub(x = .out_tab, pattern = " \\[", replacement = "\\\\\n[")
+
   .out_tab <- ifelse(is.na(.out_tab), "", .out_tab)
 
   if (.type == "latex") {
-    rownames(.out_tab) <- c(.row_names, "FE", "Clustered SE",
-                            "IPW")
+    rownames(.out_tab) <- c(.row_names, "Model" , "FE", "Clustered SE", "IPW")
     xtable::print.xtable(x = xtable::xtable(x = .out_tab,
                                             align = c("X", rep(.latex_colwidth, (ncol(.out_tab)))),
                                             caption = .title), sanitize.text.function = .latex_sanitize,
@@ -124,8 +126,7 @@ table_fun <- function(.table_list,
   } else {
     .split_tab <- base::split(1:dim(.out_tab)[2], base::ceiling(1:dim(.out_tab)[2]/.col_print))
     for (i in 1:length(.split_tab)) {
-      .temp <- cbind(c(.row_names, "FE", "Clustered SE",
-                       "IPW"), .out_tab[, .split_tab[[i]]])
+      .temp <- cbind(c(.row_names, "Model",  "FE", "Clustered SE", "IPW"), .out_tab[, .split_tab[[i]]])
       colnames(.temp) <- c("", .col_names[.split_tab[[i]]])
       print(knitr::kable(x = .temp, format = .type,
                          caption = ifelse(i == 1, .title, "Table continued"),
