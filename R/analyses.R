@@ -11,6 +11,7 @@
 #' @param .data Data frame which contains all the relevant variables.
 #' @param .model Character string specifying the model to estimate. Currently only "lm" and "logit"/"probit" and "ologit"/"oprobit" is supported. Default is "lm".
 #' @param .margin_at Character string which should be in the format of \code{'var_name = value'}, defaults to NULL (no marginal effects). This calculates the marginal effects of the \code{.treat} variable in Logit and Probit models at these particular levels. Takes only binary variables.
+#' @param .r2_glm One of "McFadden", "r2ML" and "r2CU". See \code{?pscl::pR2} for details.
 #' @param .treat_only Logical vector of length 1, specifying whether only \code{.treat} estimates should be reported. Defaults to \code{FALSE}.
 #' @param .status Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.
 #' @param .stars If \code{FALSE} no stars are passed to printout.
@@ -38,6 +39,7 @@
 #' @importFrom lmtest coeftest
 #' @importFrom modmarg marg
 #' @importFrom MASS polr
+#' @importFrom pscl pR2
 #' @importFrom margins margins
 #' @export
 
@@ -53,6 +55,7 @@ analyses <- function(.DV,
                      .model = "lm",
                      .treat_only = FALSE,
                      .margin_at = NULL,
+                     .r2_glm = "McFadden", # r2ML, r2CU
                      .status = NULL,
                      .stars = FALSE) {
 
@@ -129,7 +132,7 @@ analyses <- function(.DV,
       ## LOGISTIC AND PROBIT MODELS
 
       requireNamespace("multiwayvcov", quietly = TRUE)
-      requireNamespace("modmarg", quietly = TRUE)
+      requireNamespace("pscl", quietly = TRUE)
 
       fit <-
         suppressWarnings(
@@ -140,6 +143,7 @@ analyses <- function(.DV,
                        if (!is.null(.IPW)) unlist(frame_df[, .IPW]))
         )
 
+      r.squared_log_prob <- pscl::pR2(fit)[.r2_glm]
 
       if (is.null(.margin_at)) {
 
@@ -157,6 +161,8 @@ analyses <- function(.DV,
                               .dots = "!base::grepl(pattern = 'factor', x = term)")
 
       } else if (!is.null(.margin_at)) {
+
+        requireNamespace("modmarg", quietly = TRUE)
 
         if (!all(frame_df[, .treat] %in% 0:1))
           stop("Marginal effects for non-binary variables are not supported.\n")
@@ -187,6 +193,7 @@ analyses <- function(.DV,
 
       requireNamespace("MASS", quietly = TRUE)
       requireNamespace("margins", quietly = TRUE)
+      requireNamespace("pscl", quietly = TRUE)
 
       frame_df[,.DV] <- factor(frame_df[,.DV])
 
@@ -199,6 +206,8 @@ analyses <- function(.DV,
                        if (!is.null(.IPW)) unlist(frame_df[, .IPW]),
                      Hess = TRUE)
         )
+
+      r.squared_log_prob <- pscl::pR2(fit)[.r2_glm]
 
       if (is.null(.margin_at)) {
 
@@ -272,8 +281,10 @@ analyses <- function(.DV,
                        printout, p.value)
 
   list(estimates = out,
-       stat = c(adj.r.squared =
-                  ifelse(.model == "lm", fround(broom::glance(fit)$adj.r.squared, digits = 3), NA),
+       stat = c(r.squared =
+                  ifelse(test = .model == "lm",
+                         yes = fround(broom::glance(fit)$adj.r.squared, digits = 3),
+                         no = fround(r.squared_log_prob, digits = 3)),
                 n_obs = fround(nrow(frame_df), digits = 0)),
        model_spec = c(MODEL = .model,
                       HETEROGENOUS =

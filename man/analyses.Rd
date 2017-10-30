@@ -6,8 +6,8 @@
 \usage{
 analyses(.DV, .treat, .covs = NULL, .heterogenous = NULL, .subset = NULL,
   .FE = NULL, .cluster = NULL, .IPW = NULL, .data, .model = "lm",
-  .treat_only = FALSE, .margin_at = NULL, .status = NULL,
-  .stars = FALSE)
+  .treat_only = FALSE, .margin_at = NULL, .r2_glm = "McFadden",
+  .status = NULL, .stars = FALSE)
 }
 \arguments{
 \item{.DV}{Dependent variable specified as character.}
@@ -33,6 +33,8 @@ analyses(.DV, .treat, .covs = NULL, .heterogenous = NULL, .subset = NULL,
 \item{.treat_only}{Logical vector of length 1, specifying whether only \code{.treat} estimates should be reported. Defaults to \code{FALSE}.}
 
 \item{.margin_at}{Character string which should be in the format of \code{'var_name = value'}, defaults to NULL (no marginal effects). This calculates the marginal effects of the \code{.treat} variable in Logit and Probit models at these particular levels. Takes only binary variables.}
+
+\item{.r2_glm}{One of "McFadden", "r2ML" and "r2CU". See \code{?pscl::pR2} for details.}
 
 \item{.status}{Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.}
 

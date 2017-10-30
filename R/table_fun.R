@@ -5,6 +5,7 @@
 #' @param .col_names Names of models in list of analyses() outputs.
 #' @param .type "html","markdown" or "latex" as specified in knitr::kable function.
 #' @param .title Character string specifying the name of the table.
+#' @param .print_status Logical. Whether to print status of the model.
 #' @param .pad Integer number for output table padding.
 #' @param .col_print Number of columns to split by. Defaults to 5.
 #' @param .latex_colwidth If .type = "latex", character string specifying column width and alignment. Defaults to ">{\\centering\\arraybackslash\\hsize=.5\\hsize}X".
@@ -36,7 +37,8 @@ table_fun <- function(.table_list,
                       .row_names,
                       .col_names,
                       .title,
-                      .type = getOption("usefulr.type", c("html","latex","markdown")),
+                      .print_status = FALSE,
+                      .type = getOption("usefulr.type", "markdown"),
                       .pad = getOption("usefulr.html_pad", 0),
                       .col_print = getOption("usefulr.html_col", 5),
                       .latex_colwidth = getOption("usefulr.latex_colwidth",
@@ -57,7 +59,7 @@ table_fun <- function(.table_list,
   requireNamespace("knitr", quietly = TRUE)
   requireNamespace("xtable", quietly = TRUE)
 
-  .type <- match.arg(.type)
+  .type <- match.arg(arg = .type, choices = c("markdown", "html", "latex"))
   .pad <- suppressWarnings(as.integer(.pad))
   .col_print <- suppressWarnings(as.integer(.col_print))
 
@@ -75,7 +77,7 @@ table_fun <- function(.table_list,
       stop("Mismatch in length of col_names and number of columns in table_list")
     .est_tab <- .table_list$estimates[, "printout"]
 
-    .stat_tab <- unname(.table_list$stat[ifelse(is.na(.table_list$stat[1]), 2, c(2, 1))])
+    .stat_tab <- unname(.table_list$stat[c(2,1)])
     .spec_tab <- unname(.table_list$model_spec[c(1,3:5)])
     # .status_tab <- unname(.table_list$model_status[1:3])
     .out_tab <- as.matrix(c(.est_tab, .stat_tab, .spec_tab))
@@ -90,7 +92,7 @@ table_fun <- function(.table_list,
     }, x = lapply(X = .table_list["estimates", ], FUN = function(x) x[,c("term", "printout")]))))
     .est_tab <- .est_tab[, -1]
     .stat_tab <- unname(base::Reduce(f = function(x, y)
-      cbind(x,y), x = lapply(X = .table_list["stat", ], FUN = function(x) x[ifelse(is.na(x[1]), 2, c(2, 1))])))
+      cbind(x,y), x = lapply(X = .table_list["stat", ], FUN = function(x) x[c(2,1)])))
     .spec_tab <- unname(base::Reduce(f = function(x, y)
       cbind(x, y), x = lapply(X = .table_list["model_spec", ], FUN = function(x) x[c(1, 3:5)])))
     # .status_tab <- unname(base::Reduce(f = function(x, y) cbind(x,

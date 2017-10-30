@@ -19,7 +19,8 @@ Imports:
     lmtest,
     lfe,
     MASS,
-    erer
+    erer,
+    pscl
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
