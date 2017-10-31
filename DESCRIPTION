@@ -1,10 +1,10 @@
 Package: usefulr
 Title: Custom Regression and Output Functions for Replications
-Version: 0.1.0
+Version: 0.1.9
 Authors@R: person("Georgiy", "Syunyaev", email = "gs2716@columbia.edu", role = c("aut", "cre"))
 Description: The Package provides number of functions for replication of studies. The functions are made to run OLS, Probit, Logit and Ordinal Logit and Probit models and produce markdown, html or LaTeX output tables.
 Depends:
-    R (>= 3.2.0),
+    R (>= 3.3.0),
     dplyr,
     broom,
     knitr,

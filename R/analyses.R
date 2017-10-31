@@ -1,4 +1,4 @@
-#' Analysis function for EGAP replication.
+#' Analysis Function for Replications.
 #'
 #' @param DV Dependent variable specified as character.
 #' @param treat Treatment vector of variables specified as character vector.
@@ -139,6 +139,8 @@ analyses <- function(DV,
                        if (!is.null(IPW)) unlist(frame_df[, IPW]))
         )
 
+      fit$call$family$link <- model
+      fit$call$data <- frame_df
       r2_log_prob <- pscl::pR2(fit)[r2_glm]
 
       if (is.null(margin_at)) {
@@ -190,7 +192,7 @@ analyses <- function(DV,
       requireNamespace("MASS", quietly = TRUE)
       requireNamespace("pscl", quietly = TRUE)
 
-      frame_df[,DV] <- factor(frame_df[,DV])
+      frame_df[,DV] <- as.factor(frame_df[,DV])
 
       fit <-
         suppressWarnings(
@@ -202,6 +204,8 @@ analyses <- function(DV,
                      Hess = TRUE)
         )
 
+      fit$call$method <- ifelse(model == "ologit", "logistic", "probit")
+      fit$call$data <- frame_df
       r2_log_prob <- pscl::pR2(fit)[r2_glm]
 
       if (is.null(margin_at)) {
@@ -278,10 +282,10 @@ analyses <- function(DV,
                        term, estimate, std.error,
                        printout, p.value)
 
-  return(
+  list_out <-
     list(estimates = out,
          stat = c(r.squared =
-                    ifelse(test = model == "lm",
+                    ifelse(test = (model == "lm"),
                            yes = fround(broom::glance(fit)$adj.r.squared, digits = 3),
                            no = fround(r2_log_prob, digits = 3)),
                   n_obs = fround(nrow(frame_df), digits = 0)),
@@ -297,7 +301,25 @@ analyses <- function(DV,
                                      paste(IPW, collapse = " "), "no")),
          model_status = c(R = ifelse(status[1] ==
                                        1, "yes", "no"), S = ifelse(status[2] == 1, "yes", "no"),
-                          P = ifelse(status[3] == 1, "yes", "no")))
-  )
+                          P = ifelse(status[3] == 1, "yes", "no")),
+         internals = list(call = match.call(),
+                          data = data))
 
+
+  return(structure(list_out,
+                   class = c("analyses_list")) )
+
+}
+
+
+#' @export
+print.analyses_list <- function(analyses_list) {
+  cat("Call:\n")
+  print(analyses_list$internals$call)
+  cat("\n\n")
+  cat("Estimates:\n")
+  print(analyses_list$estimates)
+  cat("\n\n")
+  cat("Summary:\n R-squared =", analyses_list$stat[1], ", N =", analyses_list$stat[2])
+  invisible(analyses_list)
 }

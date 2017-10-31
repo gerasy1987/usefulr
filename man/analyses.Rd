@@ -2,7 +2,7 @@
 % Please edit documentation in R/analyses.R
 \name{analyses}
 \alias{analyses}
-\title{Analysis function for EGAP replication.}
+\title{Analysis Function for Replications.}
 \usage{
 analyses(DV, treat, covs = NULL, heterogenous = NULL, subset = NULL,
   FE = NULL, cluster = NULL, IPW = NULL, data, model = "lm",
@@ -44,7 +44,7 @@ analyses(DV, treat, covs = NULL, heterogenous = NULL, subset = NULL,
 List of three objects. \code{estimates} is estimates from the model and corresponding standard errors. \code{stat} is vector of adjusted R squared and number of observations. \code{model_spec} is logical vector of characteristics of the model.
 }
 \description{
-Analysis function for EGAP replication.
+Analysis Function for Replications.
 }
 \examples{
 \dontrun{
