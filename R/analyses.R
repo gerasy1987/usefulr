@@ -37,7 +37,6 @@
 #' @importFrom lfe felm
 #' @importFrom multiwayvcov cluster.vcov
 #' @importFrom lmtest coeftest
-#' @importFrom modmarg marg
 #' @importFrom MASS polr
 #' @importFrom pscl pR2
 #' @importFrom margins margins
@@ -63,7 +62,6 @@ analyses <- function(.DV,
   requireNamespace("plyr", quietly = TRUE)
   requireNamespace("dplyr", quietly = TRUE)
   requireNamespace("broom", quietly = TRUE)
-  # requireNamespace("Hmisc", quietly = TRUE)
   requireNamespace("lmtest", quietly = TRUE)
 
   # if (!is.null(.FE) & .model != "lm")
@@ -153,16 +151,17 @@ analyses <- function(.DV,
                              vcov =
                                if (!is.null(.cluster))
                                  suppressWarnings(
-                                   multiwayvcov::cluster.vcov(model = fit, cluster = frame_df[, .cluster]))
+                                   multiwayvcov::cluster.vcov(model = fit,
+                                                              cluster = frame_df[, .cluster]))
             )
           )
 
-        fit <- dplyr::filter_(.data = broom::tidy(fit),
-                              .dots = "!base::grepl(pattern = 'factor', x = term)")
+        fit <- dplyr::filter(.data = broom::tidy(fit),
+                             !base::grepl(pattern = 'factor', x = term))
 
       } else if (!is.null(.margin_at)) {
 
-        requireNamespace("modmarg", quietly = TRUE)
+        requireNamespace("margins", quietly = TRUE)
 
         if (!all(frame_df[, .treat] %in% 0:1))
           stop("Marginal effects for non-binary variables are not supported.\n")
@@ -171,18 +170,20 @@ analyses <- function(.DV,
 
         fit <-
           suppressWarnings(
-            modmarg::marg(mod = fit,
-                          var_interest = .treat,
-                          type = "effects",
-                          vcov_mat =
-                            if (!is.null(.cluster))
-                              suppressWarnings(
-                                multiwayvcov::cluster.vcov(model = fit, cluster = frame_df[, .cluster]))
+            summary(
+              margins::margins(model = fit,
+                               variables = .treat,
+                               type = "response",
+                               vce = "delta",
+                               vcov =
+                                 if (!is.null(.cluster))
+                                   suppressWarnings(
+                                     multiwayvcov::cluster.vcov(model = fit, cluster = frame_df[, .cluster]))
+              )
             )
           )
 
-        fit <- fit[[1]][fit[[1]]$Label == paste(.treat,"=",.margin_at),
-                        c("Label", "Margin", "Standard.Error", "P.Value")]
+        fit <- fit[c("factor", "AME", "SE", "p")]
         colnames(fit) <- c("term", "estimate", "std.error", "p.value")
 
       }
@@ -192,7 +193,6 @@ analyses <- function(.DV,
       ## ORDERED LOGISTIC AND PROBIT MODELS
 
       requireNamespace("MASS", quietly = TRUE)
-      requireNamespace("margins", quietly = TRUE)
       requireNamespace("pscl", quietly = TRUE)
 
       frame_df[,.DV] <- factor(frame_df[,.DV])
@@ -224,6 +224,8 @@ analyses <- function(.DV,
                              !base::grepl(pattern = 'factor', x = term))
 
       } else if (!is.null(.margin_at)) {
+
+        requireNamespace("margins", quietly = TRUE)
 
         fit <-
           suppressWarnings(
@@ -277,7 +279,8 @@ analyses <- function(.DV,
                                                                    digits = 3),
                   p.value = round(p.value, digits = 3))
 
-  out <- dplyr::select(.data = out, term, estimate, std.error,
+  out <- dplyr::select(.data = out,
+                       term, estimate, std.error,
                        printout, p.value)
 
   list(estimates = out,
