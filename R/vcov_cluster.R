@@ -9,6 +9,7 @@
 #' @return RETURN_DESCRIPTION
 #' @examples
 #' # ADD_EXAMPLES_HERE
+#' @import sandwich
 #' @export
 vcov_cluster <- function(.model,
                          .cluster = NULL,

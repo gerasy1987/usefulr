@@ -4,41 +4,41 @@
 \alias{analyses}
 \title{Analysis function for EGAP replication.}
 \usage{
-analyses(.DV, .treat, .covs = NULL, .heterogenous = NULL, .subset = NULL,
-  .FE = NULL, .cluster = NULL, .IPW = NULL, .data, .model = "lm",
-  .treat_only = FALSE, .margin_at = NULL, .r2_glm = "McFadden",
-  .status = NULL, .stars = FALSE)
+analyses(DV, treat, covs = NULL, heterogenous = NULL, subset = NULL,
+  FE = NULL, cluster = NULL, IPW = NULL, data, model = "lm",
+  treat_only = FALSE, margin_at = NULL, r2_glm = "McFadden",
+  status = NULL, stars = FALSE)
 }
 \arguments{
-\item{.DV}{Dependent variable specified as character.}
+\item{DV}{Dependent variable specified as character.}
 
-\item{.treat}{.treatment Character vector of variables specified as character vector.}
+\item{treat}{Treatment vector of variables specified as character vector.}
 
-\item{.covs}{Character vector of covariates specified as character vector.}
+\item{covs}{Character vector of covariates specified as character vector.}
 
-\item{.heterogenous}{Character vector of covariates to interact with treatments specified as character vector.}
+\item{heterogenous}{Character vector of covariates to interact with treatments specified as character vector.}
 
-\item{.subset}{character string specifing logical expression for subsetting.}
+\item{subset}{character string specifing logical expression for subsetting.}
 
-\item{.FE}{Character vector of fixed effects covariates specified as character vector.}
+\item{FE}{Character vector of fixed effects covariates specified as character vector.}
 
-\item{.cluster}{Covariate for clustered robust standard errors as defined by \code{multiwayvcov::cluster.vcov} function. Currently only one clustering variable option supported specified as character vector.}
+\item{cluster}{Covariate for clustered robust standard errors as defined by \code{multiwayvcov::cluster.vcov} function. Currently only one clustering variable option supported specified as character vector.}
 
-\item{.IPW}{Inverse probability weights specified as character vector.}
+\item{IPW}{Inverse probability weights specified as character vector.}
 
-\item{.data}{Data frame which contains all the relevant variables.}
+\item{data}{Data frame which contains all the relevant variables.}
 
-\item{.model}{Character string specifying the model to estimate. Currently only "lm" and "logit"/"probit" and "ologit"/"oprobit" is supported. Default is "lm".}
+\item{model}{Character string specifying the model to estimate. Currently only "lm" and "logit"/"probit" and "ologit"/"oprobit" is supported. Default is "lm".}
 
-\item{.treat_only}{Logical vector of length 1, specifying whether only \code{.treat} estimates should be reported. Defaults to \code{FALSE}.}
+\item{treat_only}{Logical vector of length 1, specifying whether only \code{treat} estimates should be reported. Defaults to \code{FALSE}.}
 
-\item{.margin_at}{Character string which should be in the format of \code{'var_name = value'}, defaults to NULL (no marginal effects). This calculates the marginal effects of the \code{.treat} variable in Logit and Probit models at these particular levels. Takes only binary variables.}
+\item{margin_at}{Character string which should be in the format of \code{'var_name = value'}, defaults to NULL (no marginal effects). This calculates the marginal effects of the \code{treat} variable in Logit and Probit models at these particular levels. Takes only binary variables.}
 
-\item{.r2_glm}{One of "McFadden", "r2ML" and "r2CU". See \code{?pscl::pR2} for details.}
+\item{r2_glm}{One of "McFadden", "r2ML" and "r2CU". See \code{?pscl::pR2} for details.}
 
-\item{.status}{Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.}
+\item{status}{Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.}
 
-\item{.stars}{If \code{FALSE} no stars are passed to printout.}
+\item{stars}{If \code{FALSE} no stars are passed to printout.}
 }
 \value{
 List of three objects. \code{estimates} is estimates from the model and corresponding standard errors. \code{stat} is vector of adjusted R squared and number of observations. \code{model_spec} is logical vector of characteristics of the model.
@@ -48,19 +48,19 @@ Analysis function for EGAP replication.
 }
 \examples{
 \dontrun{
-usefulr::analyses(.DV = "mpg",
-                  .treat = "vs",
-                  .model = "lm",
-                  .covs = c("carb", "disp"),
-                  .heterogenous = "cyl",
-                  .IPW = "drat",
-                  .cluster = "gear",
-                  .subset = "qsec >= 16",
-                  .FE = "vs",
-                  .treat_only = FALSE,
-                  .status = c(T,T,F),
-                  .data = mtcars,
-                  .margin_at = NULL)
+usefulr::analyses(DV = "mpg",
+                  treat = "vs",
+                  model = "lm",
+                  covs = c("carb", "disp"),
+                  heterogenous = "cyl",
+                  IPW = "drat",
+                  cluster = "gear",
+                  subset = "qsec >= 16",
+                  FE = "vs",
+                  treat_only = FALSE,
+                  status = c(T,T,F),
+                  data = mtcars,
+                  margin_at = NULL)
          }
 
 }

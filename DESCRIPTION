@@ -19,7 +19,8 @@ Imports:
     lfe,
     MASS,
     erer,
-    pscl
+    pscl,
+    margins
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
