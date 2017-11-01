@@ -139,9 +139,10 @@ analyses <- function(DV,
                        if (!is.null(IPW)) unlist(frame_df[, IPW]))
         )
 
-      fit$call$family$link <- model
-      fit$call$data <- frame_df
-      r2_log_prob <- pscl::pR2(fit)[r2_glm]
+      llh <-  logLik(fit)
+      llhNull <- logLik(update(fit, formula. = ~1))
+
+      r2_log_prob <- 1 - ((llh - attr(llh, which = "df") + attr(llhNull, which = "df")) / llhNull)
 
       if (is.null(margin_at)) {
 
@@ -204,9 +205,11 @@ analyses <- function(DV,
                      Hess = TRUE)
         )
 
-      fit$call$method <- ifelse(model == "ologit", "logistic", "probit")
-      fit$call$data <- frame_df
-      r2_log_prob <- pscl::pR2(fit)[r2_glm]
+
+      llh <-  logLik(fit)
+      llhNull <- logLik(update(fit, formula. = ~1))
+
+      r2_log_prob <- 1 - ((llh - attr(llh, which = "df") + attr(llhNull, which = "df")) / llhNull)
 
       if (is.null(margin_at)) {
 
@@ -263,8 +266,6 @@ analyses <- function(DV,
 
   if (treat_only) estout <- estout[grepl(pattern = treat, x = estout$term),]
 
-  # estout[1, 1] <- "intercept"
-  # }
 
   out <-
     dplyr::mutate(estout,
@@ -303,11 +304,16 @@ analyses <- function(DV,
                                        1, "yes", "no"), S = ifelse(status[2] == 1, "yes", "no"),
                           P = ifelse(status[3] == 1, "yes", "no")),
          internals = list(call = match.call(),
-                          data = data))
+                          data = data,
+                          estfun_formula =
+                            ifelse((model == "lm"),
+                                   paste(main_formula, "|",
+                                         FE_formula, "|", 0, "|", cluster_formula),
+                                   main_formula_FE) ))
 
 
   return(structure(list_out,
-                   class = c("analyses_list")) )
+                   class = c("analyses_list", "list")) )
 
 }
 
@@ -316,10 +322,10 @@ analyses <- function(DV,
 print.analyses_list <- function(analyses_list) {
   cat("Call:\n")
   print(analyses_list$internals$call)
-  cat("\n\n")
-  cat("Estimates:\n")
-  print(analyses_list$estimates)
-  cat("\n\n")
-  cat("Summary:\n R-squared =", analyses_list$stat[1], ", N =", analyses_list$stat[2])
+  cat("\nEstimation formula:\n")
+  print(analyses_list$internals$estfun_formula)
+  cat("\nEstimates:\n")
+  print(analyses_list$estimates[,c("term","estimate","std.error")])
+  cat("\nSummary:\nAdj. R2 =", analyses_list$stat[1], ", N =", analyses_list$stat[2])
   invisible(analyses_list)
 }
