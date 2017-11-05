@@ -19,7 +19,6 @@ Imports:
     lfe,
     MASS,
     erer,
-    pscl,
     margins
 License: GPL-2
 Encoding: UTF-8

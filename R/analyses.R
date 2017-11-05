@@ -11,7 +11,6 @@
 #' @param data Data frame which contains all the relevant variables.
 #' @param model Character string specifying the model to estimate. Currently only "lm" and "logit"/"probit" and "ologit"/"oprobit" is supported. Default is "lm".
 #' @param margin_at Character string which should be in the format of \code{'var_name = value'}, defaults to NULL (no marginal effects). This calculates the marginal effects of the \code{treat} variable in Logit and Probit models at these particular levels. Takes only binary variables.
-#' @param r2_glm One of "McFadden", "r2ML" and "r2CU". See \code{?pscl::pR2} for details.
 #' @param treat_only Logical vector of length 1, specifying whether only \code{treat} estimates should be reported. Defaults to \code{FALSE}.
 #' @param status Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.
 #' @param stars If \code{FALSE} no stars are passed to printout.
@@ -38,7 +37,6 @@
 #' @importFrom multiwayvcov cluster.vcov
 #' @importFrom lmtest coeftest
 #' @importFrom MASS polr
-#' @importFrom pscl pR2
 #' @importFrom margins margins
 #' @export
 
@@ -54,7 +52,6 @@ analyses <- function(DV,
                      model = "lm",
                      treat_only = FALSE,
                      margin_at = NULL,
-                     r2_glm = "McFadden", # r2ML, r2CU
                      status = NULL,
                      stars = FALSE) {
 

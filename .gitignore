@@ -44,6 +44,7 @@ Temporary Items
 
 # Session Data files
 .RData
+*.Rmd
 
 # Example code in package build process
 *-Ex.R
