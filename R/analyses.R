@@ -209,7 +209,7 @@ analyses <- function(DV,
       llh <-  logLik(fit)
       llhNull <- logLik(update(fit, formula. = ~1))
 
-      r2_log_prob <- 1 - ((llh - attr(llh, which = "df") + attr(llhNull, which = "df")) / llhNull)
+      r2_log_prob <- as.numeric(1 - ((llh - attr(llh, which = "df") + attr(llhNull, which = "df")) / llhNull))
 
       if (is.null(margin_at)) {
 
@@ -234,8 +234,15 @@ analyses <- function(DV,
             ocme_mod(w = fit,
                      vcov = if (!is.null(cluster)) vcov_cluster(fit,
                                                                 .cluster = frame_df[, cluster])
-            )$out[[paste0("ME.", margin_at)]]
+            )$out
           )
+
+
+        if ( !(paste0("ME.", margin_at) %in% names(fit)) )
+          stop("margin_at is out of bounds of dependent variable.")
+
+        fit <- fit[[paste0("ME.", margin_at)]]
+
 
         fit <- dplyr::filter(.data = fit,
                              !base::grepl(pattern = 'factor', x = term))
@@ -326,6 +333,6 @@ print.analyses_list <- function(analyses_list) {
   print(analyses_list$internals$estfun_formula)
   cat("\nEstimates:\n")
   print(analyses_list$estimates[,c("term","estimate","std.error")])
-  cat("\nSummary:\nAdj. R2 =", analyses_list$stat[1], ", N =", analyses_list$stat[2])
+  cat("\nSummary:\nAdj. R2 =", analyses_list$stat[1], ", N =", analyses_list$stat[2],"\n")
   invisible(analyses_list)
 }
