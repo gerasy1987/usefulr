@@ -7,7 +7,7 @@ Georgiy Syunyaev
 pacman::p_load(knitr)
 
 opts_chunk$set(include = TRUE, 
-               results = 'asis', 
+               results = "markup", 
                message = FALSE, 
                warning = FALSE, 
                error   = FALSE)
@@ -47,16 +47,20 @@ usefulr::analyses(DV = "gear",
                    stars = FALSE)
 ```
 
-Call: usefulr::analyses(DV = “gear”, treat = “vs”, covs = NULL,
-heterogenous = NULL, subset = NULL, FE = “carb”, cluster = “am”, IPW =
-NULL, data = mtcars, model = “lm”, treat\_only = FALSE, status = c(T, T,
-F), stars = FALSE)
-
-Estimation formula: \[1\] “gear ~ vs \| carb \| 0 \| am”
-
-Estimates: term estimate std.error 1 vs 0.683 0.546
-
-Summary: Adj. R2 = 0.280 , N = 32
+    ## Call:
+    ## usefulr::analyses(DV = "gear", treat = "vs", covs = NULL, heterogenous = NULL, 
+    ##     subset = NULL, FE = "carb", cluster = "am", IPW = NULL, data = mtcars, 
+    ##     model = "lm", treat_only = FALSE, status = c(T, T, F), stars = FALSE)
+    ## 
+    ## Estimation formula:
+    ## [1] "gear ~ vs | carb | 0 | am"
+    ## 
+    ## Estimates:
+    ##   term estimate std.error
+    ## 1   vs    0.683     0.546
+    ## 
+    ## Summary:
+    ## Adj. R2 = 0.280 , N = 32
 
 -   Here is the example of call to estimate and produce the output for
     `lm` (OLS) model with continous treatment on subsetted dataset with
@@ -78,18 +82,22 @@ usefulr::analyses(DV = "mpg",
                   stars = TRUE)
 ```
 
-Call: usefulr::analyses(DV = “mpg”, treat = “cyl”, covs = “carb”,
-heterogenous = “hp”, subset = “disp &gt;= 0 & disp &lt;= 300”, FE =
-“vs”, cluster = “gear”, data = mtcars, model = “lm”, treat\_only = TRUE,
-status = c(T, T, F), stars = TRUE)
-
-Estimation formula: \[1\] “mpg ~ cyl + cyl:hp + hp + carb \| vs \| 0 \|
-gear”
-
-Estimates: term estimate std.error 1 cyl -5.172 0.933 2 cyl:hp 0.026
-0.006
-
-Summary: Adj. R2 = 0.621 , N = 21
+    ## Call:
+    ## usefulr::analyses(DV = "mpg", treat = "cyl", covs = "carb", heterogenous = "hp", 
+    ##     subset = "disp >= 0 & disp <= 300", FE = "vs", cluster = "gear", 
+    ##     data = mtcars, model = "lm", treat_only = TRUE, status = c(T, 
+    ##         T, F), stars = TRUE)
+    ## 
+    ## Estimation formula:
+    ## [1] "mpg ~ cyl + cyl:hp + hp + carb | vs | 0 | gear"
+    ## 
+    ## Estimates:
+    ##     term estimate std.error
+    ## 1    cyl   -5.172     0.933
+    ## 2 cyl:hp    0.026     0.006
+    ## 
+    ## Summary:
+    ## Adj. R2 = 0.621 , N = 21
 
 Binary outcomes models (`model = "logit"` or `model = "probit"`)
 ----------------------------------------------------------------
@@ -116,16 +124,21 @@ usefulr::analyses(DV = "am",
                   stars = FALSE)
 ```
 
-Call: usefulr::analyses(DV = “am”, treat = “vs”, covs = “carb”,
-heterogenous = NULL, subset = NULL, FE = NULL, cluster = “gear”, IPW =
-NULL, data = mtcars, model = “probit”, treat\_only = TRUE, margin\_at =
-NULL, status = c(T, T, F), stars = FALSE)
-
-Estimation formula: \[1\] “am ~ vs + carb”
-
-Estimates: term estimate std.error 1 vs 0.788 0.963
-
-Summary: Adj. R2 = -0.044 , N = 32
+    ## Call:
+    ## usefulr::analyses(DV = "am", treat = "vs", covs = "carb", heterogenous = NULL, 
+    ##     subset = NULL, FE = NULL, cluster = "gear", IPW = NULL, data = mtcars, 
+    ##     model = "probit", treat_only = TRUE, margin_at = NULL, status = c(T, 
+    ##         T, F), stars = FALSE)
+    ## 
+    ## Estimation formula:
+    ## [1] "am ~ vs + carb"
+    ## 
+    ## Estimates:
+    ##   term estimate std.error
+    ## 1   vs    0.788     0.963
+    ## 
+    ## Summary:
+    ## Adj. R2 = -0.044 , N = 32
 
 -   Here is the example of call to estimate and produce the output for
     `logit` model with binary treatment on subsetted dataset with
@@ -151,17 +164,21 @@ usefulr::analyses(DV = "am",
                   stars = TRUE)
 ```
 
-Call: usefulr::analyses(DV = “am”, treat = “vs”, covs = NULL,
-heterogenous = NULL, subset = “disp &gt;= 0 & disp &lt;= 300”, FE =
-“gear”, cluster = “gear”, IPW = NULL, data = mtcars, model = “logit”,
-treat\_only = FALSE, margin\_at = TRUE, status = c(F, F, F), stars =
-TRUE)
-
-Estimation formula: \[1\] “am ~ vs + factor(gear)”
-
-Estimates: term estimate std.error 1 vs -2.122 0.152
-
-Summary: Adj. R2 = 0.330 , N = 21
+    ## Call:
+    ## usefulr::analyses(DV = "am", treat = "vs", covs = NULL, heterogenous = NULL, 
+    ##     subset = "disp >= 0 & disp <= 300", FE = "gear", cluster = "gear", 
+    ##     IPW = NULL, data = mtcars, model = "logit", treat_only = FALSE, 
+    ##     margin_at = TRUE, status = c(F, F, F), stars = TRUE)
+    ## 
+    ## Estimation formula:
+    ## [1] "am ~ vs + factor(gear)"
+    ## 
+    ## Estimates:
+    ##   term estimate std.error
+    ## 1   vs   -2.122     0.152
+    ## 
+    ## Summary:
+    ## Adj. R2 = 0.330 , N = 21
 
 Ordered categorical outcomes (`model = "ologit"` or `model = "oprobit"`)
 ------------------------------------------------------------------------
@@ -189,16 +206,21 @@ usefulr::analyses(DV = "gear",
                   stars = FALSE)
 ```
 
-Call: usefulr::analyses(DV = “gear”, treat = “vs”, covs = NULL,
-heterogenous = NULL, subset = NULL, FE = “am”, cluster = “am”, IPW =
-NULL, data = mtcars, model = “ologit”, treat\_only = FALSE, margin\_at =
-NULL, status = c(T, T, F), stars = FALSE)
-
-Estimation formula: \[1\] “gear ~ vs + factor(am)”
-
-Estimates: term estimate std.error 1 vs 0.552 2.794
-
-Summary: Adj. R2 = 0.377 , N = 32
+    ## Call:
+    ## usefulr::analyses(DV = "gear", treat = "vs", covs = NULL, heterogenous = NULL, 
+    ##     subset = NULL, FE = "am", cluster = "am", IPW = NULL, data = mtcars, 
+    ##     model = "ologit", treat_only = FALSE, margin_at = NULL, status = c(T, 
+    ##         T, F), stars = FALSE)
+    ## 
+    ## Estimation formula:
+    ## [1] "gear ~ vs + factor(am)"
+    ## 
+    ## Estimates:
+    ##   term estimate std.error
+    ## 1   vs    0.552     2.794
+    ## 
+    ## Summary:
+    ## Adj. R2 = 0.377 , N = 32
 
 -   Here is the example of call to estimate and produce the output for
     `oprobit` (ordered probit) model with clustered SE’s, fixed effects
@@ -223,13 +245,18 @@ usefulr::analyses(DV = "gear",
                   stars = TRUE)
 ```
 
-Call: usefulr::analyses(DV = “gear”, treat = “vs”, covs = NULL,
-heterogenous = NULL, subset = NULL, FE = NULL, cluster = “am”, IPW =
-NULL, data = mtcars, model = “oprobit”, treat\_only = TRUE, margin\_at =
-“5”, status = c(T, T, F), stars = TRUE)
-
-Estimation formula: \[1\] “gear ~ vs”
-
-Estimates: term estimate std.error 1 vs 0.121 0.106
-
-Summary: Adj. R2 = -0.005 , N = 32
+    ## Call:
+    ## usefulr::analyses(DV = "gear", treat = "vs", covs = NULL, heterogenous = NULL, 
+    ##     subset = NULL, FE = NULL, cluster = "am", IPW = NULL, data = mtcars, 
+    ##     model = "oprobit", treat_only = TRUE, margin_at = "5", status = c(T, 
+    ##         T, F), stars = TRUE)
+    ## 
+    ## Estimation formula:
+    ## [1] "gear ~ vs"
+    ## 
+    ## Estimates:
+    ##   term estimate std.error
+    ## 1   vs    0.121     0.106
+    ## 
+    ## Summary:
+    ## Adj. R2 = -0.005 , N = 32
