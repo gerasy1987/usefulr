@@ -309,8 +309,7 @@ analyses <- function(DV,
          model_status = c(R = ifelse(status[1] ==
                                        1, "yes", "no"), S = ifelse(status[2] == 1, "yes", "no"),
                           P = ifelse(status[3] == 1, "yes", "no")),
-         internals = list(call = match.call(),
-                          data = if (return_df) frame_df else NULL,
+         internals = list(data = if (return_df) frame_df else NULL,
                           estfun_formula =
                             ifelse((model == "lm"),
                                    paste(main_formula, "|",
@@ -326,8 +325,6 @@ analyses <- function(DV,
 
 #' @export
 print.analyses_list <- function(analyses_list) {
-  cat("Call:\n")
-  print(analyses_list$internals$call)
   cat("\nEstimation formula:\n")
   print(analyses_list$internals$estfun_formula)
   cat("\nEstimates:\n")
