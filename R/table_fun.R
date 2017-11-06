@@ -98,7 +98,7 @@ table_fun <- function(.table_list,
     # .status_tab <- unname(base::Reduce(f = function(x, y) cbind(x,
     #     y), x = lapply(X = .table_list["model_status", ],
     #     FUN = function(x) x[1:3])))
-    .out_tab <- rbind(.est_tab, .stat_tab, .spec_tab)
+    .out_tab <- unname(rbind(.est_tab, .stat_tab, .spec_tab))
   }
 
   if (.type %in% c("markdown", "latex"))
