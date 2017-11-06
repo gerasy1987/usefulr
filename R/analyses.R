@@ -14,6 +14,7 @@
 #' @param treat_only Logical vector of length 1, specifying whether only \code{treat} estimates should be reported. Defaults to \code{FALSE}.
 #' @param status Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.
 #' @param stars If \code{FALSE} no stars are passed to printout.
+#' @param return_df If \code{TRUE} dataframe used for estimation will be returned.
 #' @return List of three objects. \code{estimates} is estimates from the model and corresponding standard errors. \code{stat} is vector of adjusted R squared and number of observations. \code{model_spec} is logical vector of characteristics of the model.
 #' @examples
 #' \dontrun{
@@ -53,7 +54,8 @@ analyses <- function(DV,
                      treat_only = FALSE,
                      margin_at = NULL,
                      status = NULL,
-                     stars = FALSE) {
+                     stars = FALSE,
+                     return_df = FALSE) {
 
   # required packages
   requireNamespace("plyr", quietly = TRUE)
@@ -308,7 +310,7 @@ analyses <- function(DV,
                                        1, "yes", "no"), S = ifelse(status[2] == 1, "yes", "no"),
                           P = ifelse(status[3] == 1, "yes", "no")),
          internals = list(call = match.call(),
-                          data = data,
+                          data = if (return_df) frame_df else NULL,
                           estfun_formula =
                             ifelse((model == "lm"),
                                    paste(main_formula, "|",

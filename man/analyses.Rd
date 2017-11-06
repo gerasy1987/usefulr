@@ -6,7 +6,8 @@
 \usage{
 analyses(DV, treat, covs = NULL, heterogenous = NULL, subset = NULL,
   FE = NULL, cluster = NULL, IPW = NULL, data, model = "lm",
-  treat_only = FALSE, margin_at = NULL, status = NULL, stars = FALSE)
+  treat_only = FALSE, margin_at = NULL, status = NULL, stars = FALSE,
+  return_df = FALSE)
 }
 \arguments{
 \item{DV}{Dependent variable specified as character.}
@@ -36,6 +37,8 @@ analyses(DV, treat, covs = NULL, heterogenous = NULL, subset = NULL,
 \item{status}{Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.}
 
 \item{stars}{If \code{FALSE} no stars are passed to printout.}
+
+\item{return_df}{If \code{TRUE} dataframe used for estimation will be returned.}
 }
 \value{
 List of three objects. \code{estimates} is estimates from the model and corresponding standard errors. \code{stat} is vector of adjusted R squared and number of observations. \code{model_spec} is logical vector of characteristics of the model.
