@@ -151,7 +151,7 @@ table_fun <- function(.table_list,
 print.table_list <- function(table_list) {
 
   for (i in 1:length(table_list)) {
-    print(.list_out[[i]])
+    print(table_list[[i]])
   }
 
 }
