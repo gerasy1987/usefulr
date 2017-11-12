@@ -112,29 +112,46 @@ table_fun <- function(.table_list,
 
   .out_tab <- ifelse(is.na(.out_tab), "", .out_tab)
 
+  .list_out <- list()
+
   if (.type == "latex") {
     rownames(.out_tab) <- c(.row_names, "Model" , "FE", "Clustered SE", "IPW")
-    xtable::print.xtable(x = xtable::xtable(x = .out_tab,
-                                            align = c("X", rep(.latex_colwidth, (ncol(.out_tab)))),
-                                            caption = .title), sanitize.text.function = .latex_sanitize,
-                         caption.placement = "top", scalebox = .latex_scalebox,
-                         size = .latex_size, include.rownames = TRUE, comment = FALSE,
-                         booktabs = TRUE, floating = .latex_floating[[1]],
-                         floating.environment = .latex_floating[[2]], tabular.environment = "tabularx",
-                         width = "\\textwidth", table.placement = .latex_placement,
-                         add.to.row = list(pos = list(c(nrow(.out_tab) - 8,
-                                                        nrow(.out_tab) - 6, nrow(.out_tab) - 3)),
-                                           command = c("\\midrule \n")))
+    .list_out[[1]] <-
+      xtable::print.xtable(x = xtable::xtable(x = .out_tab,
+                                              align = c("X", rep(.latex_colwidth, (ncol(.out_tab)))),
+                                              caption = .title), sanitize.text.function = .latex_sanitize,
+                           caption.placement = "top", scalebox = .latex_scalebox,
+                           size = .latex_size, include.rownames = TRUE, comment = FALSE,
+                           booktabs = TRUE, floating = .latex_floating[[1]],
+                           floating.environment = .latex_floating[[2]], tabular.environment = "tabularx",
+                           width = "\\textwidth", table.placement = .latex_placement,
+                           add.to.row = list(pos = list(c(nrow(.out_tab) - 8,
+                                                          nrow(.out_tab) - 6, nrow(.out_tab) - 3)),
+                                             command = c("\\midrule \n")))
   } else {
     .split_tab <- base::split(1:dim(.out_tab)[2], base::ceiling(1:dim(.out_tab)[2]/.col_print))
     for (i in 1:length(.split_tab)) {
       .temp <- cbind(c(.row_names, "Model",  "FE", "Clustered SE", "IPW"), .out_tab[, .split_tab[[i]]])
       colnames(.temp) <- c("", .col_names[.split_tab[[i]]])
-      print(knitr::kable(x = .temp, format = .type,
-                         caption = ifelse(i == 1, .title, "Table continued"),
-                         align = c("l", rep("c", (ncol(.temp) - 1))), escape = TRUE,
-                         padding = .pad))
+      .list_out[[i]] <-
+          knitr::kable(x = .temp, format = .type,
+                       caption = ifelse(i == 1, .title, "Table continued"),
+                       align = c("l", rep("c", (ncol(.temp) - 1))), escape = TRUE,
+                       padding = .pad)
     }
+
+    return(structure(.list_out,
+                     class = c("table_list", "list")))
+
+  }
+
+}
+
+#' @export
+print.table_list <- function(table_list) {
+
+  for (i in 1:length(table_list)) {
+    print(.list_out[[i]])
   }
 
 }
