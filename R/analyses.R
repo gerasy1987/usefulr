@@ -303,7 +303,7 @@ analyses <- function(DV,
                         FE = ifelse(!is.null(FE),
                                     paste(FE, collapse = ", "), "no"),
                         commaCLUSTER = ifelse(!is.null(cluster),
-                                              paste(cluster, collapse = " "), "no"),
+                                              paste(cluster, collapse = ", "), "no"),
                         IPW = ifelse(!is.null(IPW),
                                      paste(IPW, collapse = ", "), "no")),
          model_status = c(R = ifelse(status[1] ==
