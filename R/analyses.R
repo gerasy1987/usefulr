@@ -7,6 +7,7 @@
 #' @param subset character string specifing logical expression for subsetting.
 #' @param FE Character vector of fixed effects covariates specified as character vector.
 #' @param cluster Covariate for clustered robust standard errors as defined by \code{multiwayvcov::cluster.vcov} function. Currently only one clustering variable option supported specified as character vector.
+#' @param robust Logical. Whether to report heteroskedastic robust standard errors. Implemented only for linear models for now.
 #' @param IPW Inverse probability weights specified as character vector.
 #' @param data Data frame which contains all the relevant variables.
 #' @param model Character string specifying the model to estimate. Currently only "lm" and "logit"/"probit" and "ologit"/"oprobit" is supported. Default is "lm".
@@ -48,6 +49,7 @@ analyses <- function(DV,
                      subset = NULL,
                      FE = NULL,
                      cluster = NULL,
+                     robust = !is.null(cluster),
                      IPW = NULL,
                      data,
                      model = "lm",
@@ -63,6 +65,8 @@ analyses <- function(DV,
   requireNamespace("broom", quietly = TRUE)
   requireNamespace("lmtest", quietly = TRUE)
 
+  if (model != "lm" & is.null(cluster) & robust)
+    warning("Heteroskedastic robust SE are only implemented for model = 'lm' at this moment. Regular SE will be reported")
 
   frame_formula <-
     stats::as.formula(paste(DV, "~", paste(c(treat, covs, FE, cluster, IPW, heterogenous),
@@ -104,14 +108,15 @@ analyses <- function(DV,
     if (is.null(IPW)) {
       fit <-
         suppressWarnings(
-          lfe::felm(formula = fit_formula,
-                    data = frame_df))
+          summary(lfe::felm(formula = fit_formula,
+                            data = frame_df), robust = robust)
+          )
     } else {
       fit <-
         suppressWarnings(
-          lfe::felm(formula = fit_formula,
+          summary(lfe::felm(formula = fit_formula,
                     data = frame_df,
-                    weights = unlist(frame_df[, IPW]))
+                    weights = unlist(frame_df[, IPW])), robust = robust)
         )
     }
 
@@ -267,7 +272,8 @@ analyses <- function(DV,
   if (model %in% c("logit", "probit", "ologit", "oprobit")) {
     estout <- fit[, col_names]
   } else {
-    estout <- broom::tidy(fit)[, col_names]
+    estout <- broom::tidy(fit$coefficients)[,c(1:3,5)]
+    colnames(estout) <- col_names
   }
 
   if (treat_only) estout <- estout[grepl(pattern = treat, x = estout$term),]
@@ -293,7 +299,7 @@ analyses <- function(DV,
     list(estimates = out,
          stat = c(r.squared =
                     ifelse(test = (model == "lm"),
-                           yes = fround(broom::glance(fit)$adj.r.squared, digits = 3),
+                           yes = fround(fit$r2adj, digits = 3),
                            no = fround(r2_log_prob, digits = 3)),
                   n_obs = fround(nrow(frame_df), digits = 0)),
          model_spec = c(MODEL = model,

@@ -5,9 +5,9 @@
 \title{Analysis Function for Replications.}
 \usage{
 analyses(DV, treat, covs = NULL, heterogenous = NULL, subset = NULL,
-  FE = NULL, cluster = NULL, IPW = NULL, data, model = "lm",
-  treat_only = FALSE, margin_at = NULL, status = NULL, stars = FALSE,
-  return_df = FALSE)
+  FE = NULL, cluster = NULL, robust = !is.null(cluster), IPW = NULL,
+  data, model = "lm", treat_only = FALSE, margin_at = NULL,
+  status = NULL, stars = FALSE, return_df = FALSE)
 }
 \arguments{
 \item{DV}{Dependent variable specified as character.}
@@ -23,6 +23,8 @@ analyses(DV, treat, covs = NULL, heterogenous = NULL, subset = NULL,
 \item{FE}{Character vector of fixed effects covariates specified as character vector.}
 
 \item{cluster}{Covariate for clustered robust standard errors as defined by \code{multiwayvcov::cluster.vcov} function. Currently only one clustering variable option supported specified as character vector.}
+
+\item{robust}{Logical. Whether to report heteroskedastic robust standard errors. Implemented only for linear models for now.}
 
 \item{IPW}{Inverse probability weights specified as character vector.}
 
