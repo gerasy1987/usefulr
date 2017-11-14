@@ -258,22 +258,23 @@ analyses <- function(DV,
     }
   }
   col_names <- c("term", "estimate", "std.error", "p.value")
-  # if (!is.null(FE)) {
-  #     icpt <- unname(plyr::name_rows( lfe::getfe(fit, ef = function(gamma,
-  #         addnames) absorb(gamma = gamma, addnames = addnames,
-  #         FE = frame_df[, FE]), se = T, bN = 1000, cluster = TRUE)))
-  #     icpt <- cbind(icpt[c(5, 1, 4)], pval = 2 * stats::pt(unlist(icpt[1])/unlist(icpt[4]),
-  #         df = suppressWarnings(broom::glance(fit)[, "df"]),
-  #         lower.tail = FALSE))
-  #     colnames(icpt) <- col_names
-  #     estout <- rbind(icpt, suppressWarnings(broom::tidy(fit)[,
-  #         col_names]))
-  # }
-  # else {
 
   if (model %in% c("logit", "probit", "ologit", "oprobit")) {
     estout <- fit[, col_names]
   } else {
+    # FE as-if in Stata
+    # if (!is.null(FE)) {
+    #     icpt <- unname(plyr::name_rows( lfe::getfe(fit, ef = function(gamma,
+    #         addnames) absorb(gamma = gamma, addnames = addnames,
+    #         FE = frame_df[, FE]), se = T, bN = 1000, cluster = TRUE)))
+    #     icpt <- cbind(icpt[c(5, 1, 4)], pval = 2 * stats::pt(unlist(icpt[1])/unlist(icpt[4]),
+    #         df = suppressWarnings(broom::glance(fit)[, "df"]),
+    #         lower.tail = FALSE))
+    #     colnames(icpt) <- col_names
+    #     estout <- rbind(icpt, suppressWarnings(broom::tidy(fit)[,
+    #         col_names]))
+    # }
+    # else {
     estout <- broom::tidy(fit$coefficients)[,c(1:3,5)]
     colnames(estout) <- col_names
   }
