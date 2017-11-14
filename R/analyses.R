@@ -278,8 +278,6 @@ analyses <- function(DV,
     colnames(estout) <- col_names
   }
 
-  usefulr::fround()
-
   if (treat_only) estout <- estout[grepl(pattern = treat, x = estout$term),]
 
 
