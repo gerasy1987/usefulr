@@ -4,15 +4,19 @@
 \alias{analyses}
 \title{Analysis Function for Replications.}
 \usage{
-analyses(DV, treat, covs = NULL, heterogenous = NULL, subset = NULL,
-  FE = NULL, cluster = NULL, robust = !is.null(cluster), IPW = NULL,
-  data, model = "lm", treat_only = FALSE, margin_at = NULL,
-  status = NULL, stars = FALSE, return_df = FALSE)
+analyses(DV, treat, data, model = "lm", covs = NULL, heterogenous = NULL,
+  subset = NULL, FE = NULL, cluster = NULL, robust = !is.null(cluster),
+  IPW = NULL, treat_only = FALSE, margin_at = NULL, status = NULL,
+  stars = FALSE, round_digits = 3, return_df = FALSE)
 }
 \arguments{
 \item{DV}{Dependent variable specified as character.}
 
 \item{treat}{Treatment vector of variables specified as character vector.}
+
+\item{data}{Data frame which contains all the relevant variables.}
+
+\item{model}{Character string specifying the model to estimate. Currently only "lm" (OLS), "logit" (Binary Logit), "probit" (Binary Probit), "ologit" (Ordered Logit) and "oprobit" (Ordered Probit) models are supported. Default is "lm".}
 
 \item{covs}{Character vector of covariates specified as character vector.}
 
@@ -28,17 +32,15 @@ analyses(DV, treat, covs = NULL, heterogenous = NULL, subset = NULL,
 
 \item{IPW}{Inverse probability weights specified as character vector.}
 
-\item{data}{Data frame which contains all the relevant variables.}
-
-\item{model}{Character string specifying the model to estimate. Currently only "lm" and "logit"/"probit" and "ologit"/"oprobit" is supported. Default is "lm".}
-
 \item{treat_only}{Logical vector of length 1, specifying whether only \code{treat} estimates should be reported. Defaults to \code{FALSE}.}
 
 \item{margin_at}{Character string which should be in the format of \code{'var_name = value'}, defaults to NULL (no marginal effects). This calculates the marginal effects of the \code{treat} variable in Logit and Probit models at these particular levels. Takes only binary variables.}
 
 \item{status}{Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.}
 
-\item{stars}{If \code{FALSE} no stars are passed to printout.}
+\item{stars}{Logical. If \code{FALSE} no stars are passed to printout.}
+
+\item{round_digits}{Integer. How many decimal points to round to in the output.}
 
 \item{return_df}{If \code{TRUE} dataframe used for estimation will be returned.}
 }

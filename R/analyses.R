@@ -2,6 +2,8 @@
 #'
 #' @param DV Dependent variable specified as character.
 #' @param treat Treatment vector of variables specified as character vector.
+#' @param data Data frame which contains all the relevant variables.
+#' @param model Character string specifying the model to estimate. Currently only "lm" (OLS), "logit" (Binary Logit), "probit" (Binary Probit), "ologit" (Ordered Logit) and "oprobit" (Ordered Probit) models are supported. Default is "lm".
 #' @param covs Character vector of covariates specified as character vector.
 #' @param heterogenous Character vector of covariates to interact with treatments specified as character vector.
 #' @param subset character string specifing logical expression for subsetting.
@@ -9,12 +11,11 @@
 #' @param cluster Covariate for clustered robust standard errors as defined by \code{multiwayvcov::cluster.vcov} function. Currently only one clustering variable option supported specified as character vector.
 #' @param robust Logical. Whether to report heteroskedastic robust standard errors. Implemented only for linear models for now.
 #' @param IPW Inverse probability weights specified as character vector.
-#' @param data Data frame which contains all the relevant variables.
-#' @param model Character string specifying the model to estimate. Currently only "lm" and "logit"/"probit" and "ologit"/"oprobit" is supported. Default is "lm".
 #' @param margin_at Character string which should be in the format of \code{'var_name = value'}, defaults to NULL (no marginal effects). This calculates the marginal effects of the \code{treat} variable in Logit and Probit models at these particular levels. Takes only binary variables.
 #' @param treat_only Logical vector of length 1, specifying whether only \code{treat} estimates should be reported. Defaults to \code{FALSE}.
 #' @param status Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.
-#' @param stars If \code{FALSE} no stars are passed to printout.
+#' @param stars Logical. If \code{FALSE} no stars are passed to printout.
+#' @param round_digits Integer. How many decimal points to round to in the output.
 #' @param return_df If \code{TRUE} dataframe used for estimation will be returned.
 #' @return List of three objects. \code{estimates} is estimates from the model and corresponding standard errors. \code{stat} is vector of adjusted R squared and number of observations. \code{model_spec} is logical vector of characteristics of the model.
 #' @examples
@@ -44,6 +45,8 @@
 
 analyses <- function(DV,
                      treat,
+                     data,
+                     model = "lm",
                      covs = NULL,
                      heterogenous = NULL,
                      subset = NULL,
@@ -51,12 +54,11 @@ analyses <- function(DV,
                      cluster = NULL,
                      robust = !is.null(cluster),
                      IPW = NULL,
-                     data,
-                     model = "lm",
                      treat_only = FALSE,
                      margin_at = NULL,
                      status = NULL,
                      stars = FALSE,
+                     round_digits = 3,
                      return_df = FALSE) {
 
   # required packages
@@ -276,6 +278,8 @@ analyses <- function(DV,
     colnames(estout) <- col_names
   }
 
+  usefulr::fround()
+
   if (treat_only) estout <- estout[grepl(pattern = treat, x = estout$term),]
 
 
@@ -283,13 +287,13 @@ analyses <- function(DV,
     dplyr::mutate(estout,
                   printout =
                     ifelse(is.nan(estimate), "-- [--]",
-                           paste0(fround(estimate, digits = 3),
+                           paste0(fround(estimate, digits = round_digits),
                                   ifelse(stars, add_stars(p.value), ""),
-                                  " [", fround(std.error, digits = 3), "]")),
+                                  " [", fround(std.error, digits = round_digits), "]")),
                   estimate =
                     round(estimate, digits = 3), std.error = round(std.error,
-                                                                   digits = 3),
-                  p.value = round(p.value, digits = 3))
+                                                                   digits = round_digits),
+                  p.value = round(p.value, digits = round_digits))
 
   out <- dplyr::select(.data = out,
                        term, estimate, std.error,
@@ -299,8 +303,8 @@ analyses <- function(DV,
     list(estimates = out,
          stat = c(r.squared =
                     ifelse(test = (model == "lm"),
-                           yes = fround(fit$r2adj, digits = 3),
-                           no = fround(r2_log_prob, digits = 3)),
+                           yes = fround(fit$r2adj, digits = round_digits),
+                           no = fround(r2_log_prob, digits = round_digits)),
                   n_obs = fround(nrow(frame_df), digits = 0)),
          model_spec = c(MODEL = model,
                         HETEROGENOUS =
