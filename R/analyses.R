@@ -279,6 +279,7 @@ analyses <- function(DV,
     colnames(estout) <- col_names
   }
 
+  estout <- estout[!grepl(pattern = "(Intercept)", x = estout$term, fixed = TRUE),]
   if (treat_only) estout <- estout[grepl(pattern = treat, x = estout$term),]
 
 
