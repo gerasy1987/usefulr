@@ -302,8 +302,8 @@ analyses <- function(DV,
     list(estimates = out,
          stat = c(r.squared =
                     ifelse(test = (model == "lm"),
-                           yes = fround(fit$r2adj, digits = round_digits),
-                           no = fround(r2_log_prob, digits = round_digits)),
+                           yes = fround(fit$r2adj, digits = 3),
+                           no = fround(r2_log_prob, digits = 3)),
                   n_obs = fround(nrow(frame_df), digits = 0)),
          model_spec = c(MODEL = model,
                         HETEROGENOUS =
