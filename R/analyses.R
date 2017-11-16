@@ -9,6 +9,7 @@
 #' @param subset character string specifing logical expression for subsetting.
 #' @param FE Character vector of fixed effects covariates specified as character vector.
 #' @param cluster Covariate for clustered robust standard errors as defined by \code{multiwayvcov::cluster.vcov} function. Currently only one clustering variable option supported specified as character vector.
+#' @param IV_list Character string. Should be a character string which presents valid IV formula as specified in \code{lfe::felm}.
 #' @param robust Logical. Whether to report heteroskedastic robust standard errors. Implemented only for linear models for now.
 #' @param IPW Inverse probability weights specified as character vector.
 #' @param margin_at Character string which should be in the format of \code{'var_name = value'}, defaults to NULL (no marginal effects). This calculates the marginal effects of the \code{treat} variable in Logit and Probit models at these particular levels. Takes only binary variables.
@@ -52,6 +53,7 @@ analyses <- function(DV,
                      subset = NULL,
                      FE = NULL,
                      cluster = NULL,
+                     IV_list = NULL,
                      robust = !is.null(cluster),
                      IPW = NULL,
                      treat_only = FALSE,
@@ -70,8 +72,12 @@ analyses <- function(DV,
   if (model != "lm" & is.null(cluster) & robust)
     warning("Heteroskedastic robust SE are only implemented for model = 'lm' at this moment. Regular SE will be reported")
 
+  if (model != "lm" & !is.null(IV_list))
+    warning("Instrumental variables are only implemented for model = 'lm' at this time. No instrumental variable estimates are reported")
+
   frame_formula <-
-    stats::as.formula(paste(DV, "~", paste(c(treat, covs, FE, cluster, IPW, heterogenous),
+    stats::as.formula(paste(DV, "~", paste(c(treat, covs, FE, cluster, IPW,
+                                             heterogenous, IV_list$dv, IV_list$instr),
                                            collapse = " + ")))
   if (is.null(heterogenous)) {
     main_formula <- paste(c(treat, covs), collapse = " + ")
@@ -85,16 +91,22 @@ analyses <- function(DV,
            paste0(main_formula, paste0(paste0(" + factor(", FE, ")"), collapse = "")),
            main_formula)
   FE_formula      <- ifelse(is.null(FE), 0, paste(FE, collapse = "+"))
+  if (!is.null(IV_list)) {
+    IV_formula <- paste("(", paste0(IV_list$dv, collapse = "|"), "~", paste0(IV_list$instr, collapse = "+"), ")")
+  } else {
+    IV_formula <- 0
+  }
   cluster_formula <- ifelse(is.null(cluster), 0, paste(cluster,
                                                        collapse = "+"))
   fit_formula <- stats::as.formula(paste(main_formula, "|",
-                                         FE_formula, "|", 0, "|", cluster_formula))
+                                         FE_formula, "|", IV_formula, "|", cluster_formula))
 
   frame_df <- eval(parse(text = paste0("dplyr::filter(.data = data, ", subset, ")")))
   frame_df <- eval(parse(text = paste0("dplyr::filter(.data = frame_df, ",
                                        paste(
                                          paste0("!is.na(",
-                                                c(treat, DV, FE, cluster, IPW, heterogenous), ")"),
+                                                c(treat, DV, FE, cluster, IPW, heterogenous,
+                                                  IV_list$dv, IV_list$instr), ")"),
                                          collapse = " & "), ")" )))
   frame_df <- stats::model.frame(frame_formula, data = frame_df)
 
@@ -280,7 +292,7 @@ analyses <- function(DV,
   }
 
   estout <- estout[!grepl(pattern = "(Intercept)", x = estout$term, fixed = TRUE),]
-  if (treat_only) estout <- estout[grepl(pattern = paste(treat, collapse = "|"), x = estout$term),]
+  if (treat_only) estout <- estout[grepl(pattern = paste(paste0("^", treat, "$"), collapse = "|"), x = estout$term),]
 
 
   out <-
@@ -290,9 +302,8 @@ analyses <- function(DV,
                            paste0(fround(estimate, digits = round_digits),
                                   ifelse(stars, add_stars(p.value), ""),
                                   " [", fround(std.error, digits = round_digits), "]")),
-                  estimate =
-                    round(estimate, digits = 3), std.error = round(std.error,
-                                                                   digits = round_digits),
+                  estimate = round(estimate, digits = round_digits),
+                  std.error = round(std.error, digits = round_digits),
                   p.value = round(p.value, digits = round_digits))
 
   out <- dplyr::select(.data = out,
@@ -323,7 +334,7 @@ analyses <- function(DV,
                           estfun_formula =
                             ifelse((model == "lm"),
                                    paste(main_formula, "|",
-                                         FE_formula, "|", 0, "|", cluster_formula),
+                                         FE_formula, "|", IV_formula, "|", cluster_formula),
                                    main_formula_FE) ))
 
 

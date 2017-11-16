@@ -5,9 +5,10 @@
 \title{Analysis Function for Replications.}
 \usage{
 analyses(DV, treat, data, model = "lm", covs = NULL, heterogenous = NULL,
-  subset = NULL, FE = NULL, cluster = NULL, robust = !is.null(cluster),
-  IPW = NULL, treat_only = FALSE, margin_at = NULL, status = NULL,
-  stars = FALSE, round_digits = 3, return_df = FALSE)
+  subset = NULL, FE = NULL, cluster = NULL, IV_list = NULL,
+  robust = !is.null(cluster), IPW = NULL, treat_only = FALSE,
+  margin_at = NULL, status = NULL, stars = FALSE, round_digits = 3,
+  return_df = FALSE)
 }
 \arguments{
 \item{DV}{Dependent variable specified as character.}
@@ -27,6 +28,8 @@ analyses(DV, treat, data, model = "lm", covs = NULL, heterogenous = NULL,
 \item{FE}{Character vector of fixed effects covariates specified as character vector.}
 
 \item{cluster}{Covariate for clustered robust standard errors as defined by \code{multiwayvcov::cluster.vcov} function. Currently only one clustering variable option supported specified as character vector.}
+
+\item{IV_list}{Character string. Should be a character string which presents valid IV formula as specified in \code{lfe::felm}.}
 
 \item{robust}{Logical. Whether to report heteroskedastic robust standard errors. Implemented only for linear models for now.}
 
