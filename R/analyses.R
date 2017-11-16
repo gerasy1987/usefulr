@@ -92,7 +92,12 @@ analyses <- function(DV,
            main_formula)
   FE_formula      <- ifelse(is.null(FE), 0, paste(FE, collapse = "+"))
   if (!is.null(IV_list)) {
-    IV_formula <- paste("(", paste0(IV_list$dv, collapse = "|"), "~", paste0(IV_list$instr, collapse = "+"), ")")
+    IV_formula <- paste("(",
+                        paste0(IV_list$dv, collapse = "|"), "~",
+                        paste0(ifelse(test = IV_list$factor,
+                                      yes = paste0("factor(", IV_list$instr, ")"),
+                                      no = IV_list$instr), collapse = "+"),
+                        ")")
   } else {
     IV_formula <- 0
   }
