@@ -76,8 +76,8 @@ analyses <- function(DV,
     warning("Instrumental variables are only implemented for model = 'lm' at this time. No instrumental variable estimates are reported")
 
   frame_formula <-
-    stats::as.formula(paste(DV, "~", paste(c(treat, covs, FE, cluster, IPW,
-                                             heterogenous, IV_list$dv, IV_list$instr),
+    stats::as.formula(paste(DV, "~", paste(unique(c(treat, covs, FE, cluster, IPW,
+                                             heterogenous, IV_list$dv, IV_list$instr)),
                                            collapse = " + ")))
   if (is.null(heterogenous)) {
     main_formula <- paste(c(treat, covs), collapse = " + ")
@@ -110,8 +110,8 @@ analyses <- function(DV,
   frame_df <- eval(parse(text = paste0("dplyr::filter(.data = frame_df, ",
                                        paste(
                                          paste0("!is.na(",
-                                                c(treat, DV, FE, cluster, IPW, heterogenous,
-                                                  IV_list$dv, IV_list$instr), ")"),
+                                                unique(c(treat, DV, FE, cluster, IPW, heterogenous,
+                                                  IV_list$dv, IV_list$instr)), ")"),
                                          collapse = " & "), ")" )))
   frame_df <- stats::model.frame(frame_formula, data = frame_df)
 
