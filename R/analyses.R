@@ -300,16 +300,31 @@ analyses <- function(DV,
   if (treat_only) estout <- estout[grepl(pattern = paste(paste0("^", treat, "$"), collapse = "|"), x = estout$term),]
 
 
-  out <-
-    dplyr::mutate(estout,
-                  printout =
-                    ifelse(is.nan(estimate), "-- [--]",
-                           paste0(fround(estimate, digits = round_digits),
-                                  ifelse(stars, add_stars(p.value), ""),
-                                  " [", fround(std.error, digits = round_digits), "]")),
-                  estimate = round(estimate, digits = round_digits),
-                  std.error = round(std.error, digits = round_digits),
-                  p.value = round(p.value, digits = round_digits))
+
+  if (stars) {
+    out <-
+      dplyr::mutate(estout,
+                    printout =
+                      ifelse(is.nan(estimate), "-- [--]",
+                             paste0(fround(estimate, digits = round_digits),
+                                    add_stars(p.value),
+                                    " [", fround(std.error, digits = round_digits), "]")),
+                    estimate = round(estimate, digits = round_digits),
+                    std.error = round(std.error, digits = round_digits),
+                    p.value = round(p.value, digits = round_digits))
+  } else if (!stars) {
+    out <-
+      dplyr::mutate(estout,
+                    printout =
+                      ifelse(is.nan(estimate), "-- [--]",
+                             paste0(fround(estimate, digits = round_digits),
+                                    " [", fround(std.error, digits = round_digits), "]")),
+                    estimate = round(estimate, digits = round_digits),
+                    std.error = round(std.error, digits = round_digits),
+                    p.value = round(p.value, digits = round_digits))
+  }
+
+
 
   out <- dplyr::select(.data = out,
                        term, estimate, std.error,
