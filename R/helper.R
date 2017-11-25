@@ -58,3 +58,21 @@ make_df <- function(.matrix,
   names(df) <- .names
   return(df)
 }
+
+
+
+#' Fix names of variables after join operation
+#'
+#' FUNCTION_DESCRIPTION
+#'
+#' @param .data DESCRIPTION.
+#'
+#' @return RETURN_DESCRIPTION
+#' @examples
+#' # ADD_EXAMPLES_HERE
+#' @export
+fix_join <- function(.data) {
+  names(.data) <- gsub(pattern = ".x$", replacement = "", x = names(.data))
+  names(.data) <- gsub(pattern = ".y$", replacement = "_merged", x = names(.data))
+  return(.data)
+}
