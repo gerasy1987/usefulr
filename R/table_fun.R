@@ -40,20 +40,20 @@ table_fun <- function(.table_list,
                       .print_status = FALSE,
                       .type = getOption("usefulr.type", "markdown"),
                       .pad = getOption("usefulr.html_pad", 0),
-                      .col_print = getOption("usefulr.html_col", 5),
-                      .latex_colwidth = getOption("usefulr.latex_colwidth",
-                                                  ">{\\centering\\arraybackslash\\hsize=.5\\hsize}X"),
-                      .latex_scalebox = getOption("usefulr.latex_scalebox", 1),
-                      .latex_size = getOption("usefulr.latex_size", "small"),
-                      .latex_spacing = getOption("usefulr.latex_spacing", "\\hspace{0.2in}"),
-                      .latex_sanitize = getOption("usefulr.latex_sanitize",
-                                                  function(str) { mgsub(pattern = c("_", " ["),
-                                                                        replacement = c("\\_", paste("", .latex_spacing, "[")),
-                                                                        x = str,
-                                                                        fixed = TRUE)
-                                                    } ),
-                      .latex_floating = list(TRUE, "table"),
-                      .latex_placement = getOption("usefulr.latex_placement", "H")
+                      .col_print = getOption("usefulr.html_col", 5) #,
+                      # .latex_colwidth = getOption("usefulr.latex_colwidth",
+                      #                             ">{\\centering\\arraybackslash\\hsize=.5\\hsize}X"),
+                      # .latex_scalebox = getOption("usefulr.latex_scalebox", 1),
+                      # .latex_size = getOption("usefulr.latex_size", "small"),
+                      # .latex_spacing = getOption("usefulr.latex_spacing", "\\hspace{0.2in}"),
+                      # .latex_sanitize = getOption("usefulr.latex_sanitize",
+                      #                             function(str) { mgsub(pattern = c("_", " ["),
+                      #                                                   replacement = c("\\_", paste("", .latex_spacing, "[")),
+                      #                                                   x = str,
+                      #                                                   fixed = TRUE)
+                      #                               } ),
+                      # .latex_floating = list(TRUE, "table"),
+                      # .latex_placement = getOption("usefulr.latex_placement", "H")
                       ) {
 
   requireNamespace("knitr", quietly = TRUE)
@@ -117,17 +117,22 @@ table_fun <- function(.table_list,
   if (.type == "latex") {
     rownames(.out_tab) <- c(.row_names, "Model" , "FE", "Clustered SE", "IPW")
     .list_out[[1]] <-
-      xtable::print.xtable(x = xtable::xtable(x = .out_tab,
-                                              align = c("X", rep(.latex_colwidth, (ncol(.out_tab)))),
-                                              caption = .title), sanitize.text.function = .latex_sanitize,
-                           caption.placement = "top", scalebox = .latex_scalebox,
-                           size = .latex_size, include.rownames = TRUE, comment = FALSE,
-                           booktabs = TRUE, floating = .latex_floating[[1]],
-                           floating.environment = .latex_floating[[2]], tabular.environment = "tabularx",
-                           width = "\\textwidth", table.placement = .latex_placement,
-                           add.to.row = list(pos = list(c(nrow(.out_tab) - 8,
-                                                          nrow(.out_tab) - 6, nrow(.out_tab) - 3)),
-                                             command = c("\\midrule \n")))
+      knitr::kable(x = .temp, format = .type,
+                   caption = .title,
+                   align = c("l", rep("c", (ncol(.temp) - 1))), escape = TRUE,
+                   padding = .pad,
+                   booktabs = TRUE)
+      # xtable::print.xtable(x = xtable::xtable(x = .out_tab,
+      #                                         align = c("X", rep(.latex_colwidth, (ncol(.out_tab)))),
+      #                                         caption = .title), sanitize.text.function = .latex_sanitize,
+      #                      caption.placement = "top", scalebox = .latex_scalebox,
+      #                      size = .latex_size, include.rownames = TRUE, comment = FALSE,
+      #                      booktabs = TRUE, floating = .latex_floating[[1]],
+      #                      floating.environment = .latex_floating[[2]], tabular.environment = "tabularx",
+      #                      width = "\\textwidth", table.placement = .latex_placement,
+      #                      add.to.row = list(pos = list(c(nrow(.out_tab) - 8,
+      #                                                     nrow(.out_tab) - 6, nrow(.out_tab) - 3)),
+      #                                        command = c("\\midrule \n")))
   } else {
     .split_tab <- base::split(1:dim(.out_tab)[2], base::ceiling(1:dim(.out_tab)[2]/.col_print))
     for (i in 1:length(.split_tab)) {
