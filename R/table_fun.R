@@ -69,8 +69,8 @@ table_fun <- function(.table_list,
   if (is.na(.col_print))
     stop("Column splitting should be integer")
 
-  if (!is.function(.latex_sanitize))
-    stop("Sanitize argument should be a function")
+  # if (!is.function(.latex_sanitize))
+  #   stop("Sanitize argument should be a function")
 
   if (is.null(dim(.table_list))) {
     if (length(.col_names) > 1)
