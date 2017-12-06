@@ -111,7 +111,7 @@ table_fun <- function(.table_list,
     .out_tab <- gsub(x = .out_tab, pattern = " \\[", replacement = "\\\\\n[")
 
   if (.type == "latex")
-    .out_tab <- mgsub(x = .out_tab, pattern = c("_"), replacement = c("\\_"), fixed = TRUE)
+    .out_tab <- mgsub(x = .out_tab, pattern = c("_", "%"), replacement = c("\\_", "\\%"), fixed = TRUE)
 
   .out_tab <- ifelse(is.na(.out_tab), "", .out_tab)
 
