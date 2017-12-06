@@ -120,7 +120,6 @@ table_fun <- function(.table_list,
       knitr::kable(x = .out_tab, format = .type,
                    caption = .title,
                    align = c("l", rep("c", (ncol(.out_tab) - 1))), escape = TRUE,
-                   padding = .pad,
                    booktabs = TRUE)
       # xtable::print.xtable(x = xtable::xtable(x = .out_tab,
       #                                         align = c("X", rep(.latex_colwidth, (ncol(.out_tab)))),
