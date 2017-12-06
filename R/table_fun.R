@@ -117,9 +117,9 @@ table_fun <- function(.table_list,
   if (.type == "latex") {
     rownames(.out_tab) <- c(.row_names, "Model" , "FE", "Clustered SE", "IPW")
     .list_out[[1]] <-
-      knitr::kable(x = .temp, format = .type,
+      knitr::kable(x = .out_tab, format = .type,
                    caption = .title,
-                   align = c("l", rep("c", (ncol(.temp) - 1))), escape = TRUE,
+                   align = c("l", rep("c", (ncol(.out_tab) - 1))), escape = TRUE,
                    padding = .pad,
                    booktabs = TRUE)
       # xtable::print.xtable(x = xtable::xtable(x = .out_tab,
