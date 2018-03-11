@@ -127,15 +127,15 @@ analyses <- function(DV,
     if (is.null(IPW)) {
       fit <-
         suppressWarnings(
-          summary(lfe::felm(formula = fit_formula,
-                            data = frame_df), robust = robust)
-          )
+          lfe::felm(formula = fit_formula,
+                    data = frame_df)
+        )
     } else {
       fit <-
         suppressWarnings(
-          summary(lfe::felm(formula = fit_formula,
+          lfe::felm(formula = fit_formula,
                     data = frame_df,
-                    weights = unlist(frame_df[, IPW])), robust = robust)
+                    weights = unlist(frame_df[, IPW]))
         )
     }
 
@@ -292,7 +292,7 @@ analyses <- function(DV,
     #         col_names]))
     # }
     # else {
-    estout <- broom::tidy(fit$coefficients)[,c(1:3,5)]
+    estout <- broom::tidy(summary(fit, robust = robust)$coefficients)[,c(1:3,5)]
     colnames(estout) <- col_names
   }
 
@@ -334,7 +334,7 @@ analyses <- function(DV,
     list(estimates = out,
          stat = c(r.squared =
                     ifelse(test = (model == "lm"),
-                           yes = fround(fit$r2adj, digits = 3),
+                           yes = fround(summary(fit)$r2adj, digits = 3),
                            no = fround(r2_log_prob, digits = 3)),
                   n_obs = fround(nrow(frame_df), digits = 0)),
          model_spec = c(MODEL = model,
@@ -355,7 +355,8 @@ analyses <- function(DV,
                             ifelse((model == "lm"),
                                    paste(main_formula, "|",
                                          FE_formula, "|", IV_formula, "|", cluster_formula),
-                                   main_formula_FE) ))
+                                   main_formula_FE),
+                          fit = fit))
 
 
   return(structure(list_out,
