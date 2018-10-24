@@ -292,7 +292,7 @@ analyses <- function(DV,
     #         col_names]))
     # }
     # else {
-    estout <- broom::tidy(summary(fit, robust = robust)$coefficients)[,c(1:3,5)]
+    estout <- tibble::as_tibble(summary(fit, robust = robust)$coefficients, rownames = "variable")[,c(1:3,5)]
     colnames(estout) <- col_names
   }
 
