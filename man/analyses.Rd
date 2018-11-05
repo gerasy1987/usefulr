@@ -4,11 +4,11 @@
 \alias{analyses}
 \title{Analysis Function for Replications.}
 \usage{
-analyses(DV, treat, data, model = "lm", covs = NULL, heterogenous = NULL,
-  subset = NULL, FE = NULL, cluster = NULL, IV_list = NULL,
-  robust = !is.null(cluster), IPW = NULL, treat_only = FALSE,
-  margin_at = NULL, status = NULL, stars = FALSE, round_digits = 3,
-  return_df = FALSE)
+analyses(DV, treat, data, model = "lm", covs = NULL,
+  heterogenous = NULL, subset = NULL, FE = NULL, cluster = NULL,
+  IV_list = NULL, robust = !is.null(cluster), IPW = NULL,
+  treat_only = FALSE, margin_at = NULL, status = NULL,
+  stars = FALSE, round_digits = 3, return_df = FALSE)
 }
 \arguments{
 \item{DV}{Dependent variable specified as character.}

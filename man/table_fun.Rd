@@ -4,8 +4,8 @@
 \alias{table_fun}
 \title{Generate markdown or LaTeX table from list of analyses() function outputs.}
 \usage{
-table_fun(.table_list, .row_names, .col_names, .title, .print_status = FALSE,
-  .type = getOption("usefulr.type", "markdown"),
+table_fun(.table_list, .row_names, .col_names, .title,
+  .print_status = FALSE, .type = getOption("usefulr.type", "markdown"),
   .pad = getOption("usefulr.html_pad", 0),
   .col_print = getOption("usefulr.html_col", 5))
 }
