@@ -8,7 +8,7 @@ analyses(DV, treat, data, model = "lm", covs = NULL,
   heterogenous = NULL, subset = NULL, FE = NULL, cluster = NULL,
   IV_list = NULL, robust = is.null(cluster), ri = NULL, IPW = NULL,
   treat_only = FALSE, margin_at = NULL, status = NULL,
-  stars = FALSE, round_digits = 3, return_df = FALSE)
+  stars = FALSE, round_digits = 3, return_df = FALSE, seed = 12345)
 }
 \arguments{
 \item{DV}{Dependent variable specified as character.}
@@ -48,6 +48,8 @@ analyses(DV, treat, data, model = "lm", covs = NULL,
 \item{round_digits}{Integer. How many decimal points to round to in the output.}
 
 \item{return_df}{If \code{TRUE} dataframe used for estimation will be returned.}
+
+\item{seed}{Numeric. RNG seed.}
 }
 \value{
 List of three objects. \code{estimates} is estimates from the model and corresponding standard errors. \code{stat} is vector of adjusted R squared and number of observations. \code{model_spec} is logical vector of characteristics of the model.
