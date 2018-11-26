@@ -11,6 +11,7 @@
 #' @param cluster Covariate for clustered robust standard errors as defined by \code{multiwayvcov::cluster.vcov} function. Currently only one clustering variable option supported specified as character vector.
 #' @param IV_list Character string. Should be a character string which presents valid IV formula as specified in \code{lfe::felm}.
 #' @param robust Logical. Whether to report heteroskedastic robust standard errors. Implemented only for linear models for now.
+#' @param ri Numeric. If not NULL, gives number of iterations to use for calculation of non-parametric Studentized randomization inference p-values from two-sided test. Only implemented for model = "lm" at the moment.
 #' @param IPW Inverse probability weights specified as character vector.
 #' @param margin_at Character string which should be in the format of \code{'var_name = value'}, defaults to NULL (no marginal effects). This calculates the marginal effects of the \code{treat} variable in Logit and Probit models at these particular levels. Takes only binary variables.
 #' @param treat_only Logical vector of length 1, specifying whether only \code{treat} estimates should be reported. Defaults to \code{FALSE}.
@@ -54,7 +55,8 @@ analyses <- function(DV,
                      FE = NULL,
                      cluster = NULL,
                      IV_list = NULL,
-                     robust = !is.null(cluster),
+                     robust = is.null(cluster),
+                     ri = NULL,
                      IPW = NULL,
                      treat_only = FALSE,
                      margin_at = NULL,
@@ -70,10 +72,13 @@ analyses <- function(DV,
   requireNamespace("lmtest", quietly = TRUE)
 
   if (model != "lm" & is.null(cluster) & robust)
-    warning("Heteroskedastic robust SE are only implemented for model = 'lm' at this moment. Regular SE will be reported")
+    warning("Heteroskedastic robust SE are only implemented for model = 'lm' at this moment. Regular SE will be reported.\n")
 
   if (model != "lm" & !is.null(IV_list))
-    warning("Instrumental variables are only implemented for model = 'lm' at this time. No instrumental variable estimates are reported")
+    warning("Instrumental variables are only implemented for model = 'lm' at this time. No instrumental variable estimates are reported.\n")
+
+  if (model != "lm" & !is.null(ri))
+    warning("RI p-values are only implemented for model = 'lm' at this time. Parametric SE are reported instead.\n")
 
   frame_formula <-
     stats::as.formula(paste(DV, "~", paste(unique(c(treat, covs, FE, cluster, IPW,
@@ -120,6 +125,8 @@ analyses <- function(DV,
 
   ## ESTIMATION
 
+  col_names <- c("term", "estimate", "std.error", "p.value")
+
   if (model == "lm") {
 
     requireNamespace("lfe", quietly = TRUE)
@@ -139,9 +146,120 @@ analyses <- function(DV,
         )
     }
 
+    estout <- tibble::as_tibble(summary(fit, robust = robust)$coefficients, rownames = "variable")[,c(1:3,5)]
+
+    if (!is.null(ri)) {
+
+      estout <- dplyr::mutate(estout,
+                           tstat = ifelse(`Std. Error` == 0, 0, Estimate/`Std. Error`))
+
+      requireNamespace("pbapply", quietly = TRUE)
+
+      if (is.null(IPW) & is.null(FE)) {
+
+        sim <-
+          pbapply::pbreplicate(n = ri, {
+
+              frame_df_sim <- dplyr::mutate(frame_df,
+                                            !!treat := base::sample(get(treat)))
+
+              dplyr::select(
+                dplyr::mutate(
+                  tibble::as_tibble(
+                    summary(
+                      suppressWarnings(
+                        lfe::felm(formula = fit_formula,
+                                  data = frame_df_sim)),
+                      robust = robust)$coefficients, rownames = "variable")[,c(1:3)],
+                  tstat = ifelse(`Std. Error` == 0, 0, Estimate/`Std. Error`)), tstat)
+            },
+            simplify = FALSE,
+            cl = 2)
+
+      } else if (is.null(IPW) & !is.null(FE)) {
+
+        sim <-
+          pbapply::pbreplicate(n = ri, {
+
+            frame_df_sim <-
+              dplyr::ungroup(dplyr::mutate(dplyr::group_by_at(.tbl = frame_df, .vars = vars(FE)),
+                                           !!treat := base::sample(get(treat))))
+
+            dplyr::select(
+              dplyr::mutate(
+                tibble::as_tibble(
+                  summary(
+                    suppressWarnings(
+                      lfe::felm(formula = fit_formula,
+                                data = frame_df_sim)),
+                    robust = robust)$coefficients, rownames = "variable")[,c(1:3)],
+                tstat = ifelse(`Std. Error` == 0, 0, Estimate/`Std. Error`)), tstat)
+          },
+          simplify = FALSE,
+          cl = 2)
+
+      } else if (!is.null(IPW) & is.null(FE)) {
+
+        sim <-
+          pbapply::pbreplicate(n = ri, {
+
+            frame_df_sim <- dplyr::mutate(frame_df,
+                                          !!treat := base::sample(get(treat)))
+
+            dplyr::select(
+              dplyr::mutate(
+                tibble::as_tibble(
+                  summary(
+                    suppressWarnings(
+                      lfe::felm(formula = fit_formula,
+                                data = frame_df_sim,
+                                weights = unlist(frame_df_sim[, IPW]))),
+                    robust = robust)$coefficients, rownames = "variable")[,c(1:3)],
+                tstat = ifelse(`Std. Error` == 0, 0, Estimate/`Std. Error`)), tstat)
+          },
+          simplify = FALSE,
+          cl = 2)
+
+      } else if (!is.null(IPW) & !is.null(FE)) {
+
+        sim <-
+          pbapply::pbreplicate(n = ri, {
+
+            frame_df_sim <-
+              dplyr::ungroup(dplyr::mutate(dplyr::group_by_at(.tbl = frame_df, .vars = vars(FE)),
+                                           !!treat := base::sample(get(treat))))
+
+            dplyr::select(
+              dplyr::mutate(
+                tibble::as_tibble(
+                  summary(
+                    suppressWarnings(
+                      lfe::felm(formula = fit_formula,
+                                data = frame_df_sim,
+                                weights = unlist(frame_df_sim[, IPW]))),
+                    robust = robust)$coefficients, rownames = "variable")[,c(1:3)],
+                tstat = ifelse(`Std. Error` == 0, 0, Estimate/`Std. Error`)), tstat)
+          },
+          simplify = FALSE,
+          cl = 2)
+
+      }
+
+      sim <- dplyr::bind_cols(sim)
+
+      for (i in 1:nrow(estout)) {
+        estout$`Pr(>|t|)`[i] <- min(2 * min(mean(unlist(sim[i,]) <= estout[i,"tstat"]),
+                                            mean(unlist(sim[i,]) >= estout[i,"tstat"])))
+      }
+
+      estout$`Std. Error` <- NA
+      estout <- dplyr::select(estout, -tstat)
+
+    }
+
   } else if (!is.null(heterogenous)) {
 
-    stop("Logit and Probit models with hetorogenous effects are not supported (YET!).\n")
+    stop("Logit and Probit models with hetorogenous effects are not supported at the moment.\n")
 
   } else if (is.null(heterogenous)) {
 
@@ -274,10 +392,11 @@ analyses <- function(DV,
 
     }
   }
-  col_names <- c("term", "estimate", "std.error", "p.value")
 
   if (model %in% c("logit", "probit", "ologit", "oprobit")) {
+
     estout <- fit[, col_names]
+
   } else {
     # FE as-if in Stata
     # if (!is.null(FE)) {
@@ -292,7 +411,7 @@ analyses <- function(DV,
     #         col_names]))
     # }
     # else {
-    estout <- tibble::as_tibble(summary(fit, robust = robust)$coefficients, rownames = "variable")[,c(1:3,5)]
+    estout <- estout
     colnames(estout) <- col_names
   }
 
@@ -306,9 +425,13 @@ analyses <- function(DV,
       dplyr::mutate(estout,
                     printout =
                       ifelse(is.nan(estimate), "-- [--]",
-                             paste0(fround(estimate, digits = round_digits),
-                                    add_stars(p.value),
-                                    " [", fround(std.error, digits = round_digits), "]")),
+                             ifelse(is.na(std.error),
+                                    paste0(fround(estimate, digits = round_digits),
+                                           add_stars(p.value),
+                                           " [--]"),
+                                    paste0(fround(estimate, digits = round_digits),
+                                           add_stars(p.value),
+                                           " [", fround(std.error, digits = round_digits), "]"))),
                     estimate = round(estimate, digits = round_digits),
                     std.error = round(std.error, digits = round_digits),
                     p.value = round(p.value, digits = round_digits))
@@ -317,8 +440,11 @@ analyses <- function(DV,
       dplyr::mutate(estout,
                     printout =
                       ifelse(is.nan(estimate), "-- [--]",
-                             paste0(fround(estimate, digits = round_digits),
-                                    " [", fround(std.error, digits = round_digits), "]")),
+                             ifelse(is.na(std.error),
+                                    paste0(fround(estimate, digits = round_digits),
+                                           " [--]"),
+                                    paste0(fround(estimate, digits = round_digits),
+                                           " [", fround(std.error, digits = round_digits), "]"))),
                     estimate = round(estimate, digits = round_digits),
                     std.error = round(std.error, digits = round_digits),
                     p.value = round(p.value, digits = round_digits))

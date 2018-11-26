@@ -6,7 +6,7 @@
 \usage{
 analyses(DV, treat, data, model = "lm", covs = NULL,
   heterogenous = NULL, subset = NULL, FE = NULL, cluster = NULL,
-  IV_list = NULL, robust = !is.null(cluster), IPW = NULL,
+  IV_list = NULL, robust = is.null(cluster), ri = NULL, IPW = NULL,
   treat_only = FALSE, margin_at = NULL, status = NULL,
   stars = FALSE, round_digits = 3, return_df = FALSE)
 }
@@ -32,6 +32,8 @@ analyses(DV, treat, data, model = "lm", covs = NULL,
 \item{IV_list}{Character string. Should be a character string which presents valid IV formula as specified in \code{lfe::felm}.}
 
 \item{robust}{Logical. Whether to report heteroskedastic robust standard errors. Implemented only for linear models for now.}
+
+\item{ri}{Numeric. If not NULL, gives number of iterations to use for calculation of non-parametric Studentized randomization inference p-values from two-sided test. Only implemented for model = "lm" at the moment.}
 
 \item{IPW}{Inverse probability weights specified as character vector.}
 
