@@ -368,10 +368,11 @@ analyses <- function(DV,
 #' @export
 print.analyses_list <- function(analyses_list) {
   requireNamespace("knitr", quietly = TRUE)
+  cat("Estimates:")
+  print(knitr::kable(analyses_list$estimates[,c("term","printout","p.value")],
+                     format = "pandoc", align = "lll"))
   cat("\nEstimation formula:\n")
-  print(analyses_list$internals$estfun_formula)
-  cat("\nEstimates:")
-  print(knitr::kable(analyses_list$estimates[,c("term","printout","p.value")], format = "markdown"))
+  cat(analyses_list$internals$estfun_formula, "\n")
   cat("\nSummary:\nAdj. R2 =", analyses_list$stat[1], ", N =", analyses_list$stat[2],"\n")
   invisible(analyses_list)
 }
