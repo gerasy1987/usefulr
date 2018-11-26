@@ -370,7 +370,7 @@ print.analyses_list <- function(analyses_list) {
   cat("\nEstimation formula:\n")
   print(analyses_list$internals$estfun_formula)
   cat("\nEstimates:\n")
-  print(analyses_list$estimates[,c("term","printout","p.value")])
+  knitr::kable(analyses_list$estimates[,c("term","printout","p.value")], format = "markdown")
   cat("\nSummary:\nAdj. R2 =", analyses_list$stat[1], ", N =", analyses_list$stat[2],"\n")
   invisible(analyses_list)
 }
