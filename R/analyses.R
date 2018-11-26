@@ -164,7 +164,6 @@ analyses <- function(DV,
               frame_df_sim <- dplyr::mutate(frame_df,
                                             !!treat := base::sample(get(treat)))
 
-
               .temp <- tibble::as_tibble(
                 summary(
                   suppressWarnings(
@@ -262,8 +261,8 @@ analyses <- function(DV,
       sim <- dplyr::bind_cols(sim)
 
       for (i in 1:nrow(estout)) {
-        estout$p.value[i] <- min(2 * min(mean(unlist(sim[i,]) <= estout[i,"tstat"]),
-                                         mean(unlist(sim[i,]) >= estout[i,"tstat"])))
+        estout$p.value[i] <- min(2 * min(mean(unlist(sim[i,]) <= unlist(estout[i,"tstat"])),
+                                         mean(unlist(sim[i,]) >= unlist(estout[i,"tstat"]))))
       }
 
       estout$std.error <- NA
