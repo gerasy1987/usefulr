@@ -147,11 +147,12 @@ analyses <- function(DV,
     }
 
     estout <- tibble::as_tibble(summary(fit, robust = robust)$coefficients, rownames = "variable")[,c(1:3,5)]
+    colnames(estout) <- col_names
 
     if (!is.null(ri)) {
 
       estout <- dplyr::mutate(estout,
-                           tstat = ifelse(`Std. Error` == 0, 0, Estimate/`Std. Error`))
+                              tstat = ifelse(std.error == 0, 0, estimate/std.error))
 
       requireNamespace("pbapply", quietly = TRUE)
 
@@ -163,15 +164,19 @@ analyses <- function(DV,
               frame_df_sim <- dplyr::mutate(frame_df,
                                             !!treat := base::sample(get(treat)))
 
+
+              .temp <- tibble::as_tibble(
+                summary(
+                  suppressWarnings(
+                    lfe::felm(formula = fit_formula,
+                              data = frame_df_sim)),
+                  robust = robust)$coefficients, rownames = "variable")[,c(1:3)]
+
+              colnames(.temp) <- col_names[1:3]
+
               dplyr::select(
-                dplyr::mutate(
-                  tibble::as_tibble(
-                    summary(
-                      suppressWarnings(
-                        lfe::felm(formula = fit_formula,
-                                  data = frame_df_sim)),
-                      robust = robust)$coefficients, rownames = "variable")[,c(1:3)],
-                  tstat = ifelse(`Std. Error` == 0, 0, Estimate/`Std. Error`)), tstat)
+                dplyr::mutate(.temp, tstat = ifelse(std.error == 0, 0, estimate/std.error)),
+                tstat)
             },
             simplify = FALSE,
             cl = 2)
@@ -185,15 +190,18 @@ analyses <- function(DV,
               dplyr::ungroup(dplyr::mutate(dplyr::group_by_at(.tbl = frame_df, .vars = vars(FE)),
                                            !!treat := base::sample(get(treat))))
 
+            .temp <- tibble::as_tibble(
+              summary(
+                suppressWarnings(
+                  lfe::felm(formula = fit_formula,
+                            data = frame_df_sim)),
+                robust = robust)$coefficients, rownames = "variable")[,c(1:3)]
+
+            colnames(.temp) <- col_names[1:3]
+
             dplyr::select(
-              dplyr::mutate(
-                tibble::as_tibble(
-                  summary(
-                    suppressWarnings(
-                      lfe::felm(formula = fit_formula,
-                                data = frame_df_sim)),
-                    robust = robust)$coefficients, rownames = "variable")[,c(1:3)],
-                tstat = ifelse(`Std. Error` == 0, 0, Estimate/`Std. Error`)), tstat)
+              dplyr::mutate(.temp, tstat = ifelse(std.error == 0, 0, estimate/std.error)),
+              tstat)
           },
           simplify = FALSE,
           cl = 2)
@@ -206,16 +214,19 @@ analyses <- function(DV,
             frame_df_sim <- dplyr::mutate(frame_df,
                                           !!treat := base::sample(get(treat)))
 
+            .temp <- tibble::as_tibble(
+              summary(
+                suppressWarnings(
+                  lfe::felm(formula = fit_formula,
+                            data = frame_df_sim,
+                            weights = unlist(frame_df[, IPW]))),
+                robust = robust)$coefficients, rownames = "variable")[,c(1:3)]
+
+            colnames(.temp) <- col_names[1:3]
+
             dplyr::select(
-              dplyr::mutate(
-                tibble::as_tibble(
-                  summary(
-                    suppressWarnings(
-                      lfe::felm(formula = fit_formula,
-                                data = frame_df_sim,
-                                weights = unlist(frame_df_sim[, IPW]))),
-                    robust = robust)$coefficients, rownames = "variable")[,c(1:3)],
-                tstat = ifelse(`Std. Error` == 0, 0, Estimate/`Std. Error`)), tstat)
+              dplyr::mutate(.temp, tstat = ifelse(std.error == 0, 0, estimate/std.error)),
+              tstat)
           },
           simplify = FALSE,
           cl = 2)
@@ -229,16 +240,19 @@ analyses <- function(DV,
               dplyr::ungroup(dplyr::mutate(dplyr::group_by_at(.tbl = frame_df, .vars = vars(FE)),
                                            !!treat := base::sample(get(treat))))
 
+            .temp <- tibble::as_tibble(
+              summary(
+                suppressWarnings(
+                  lfe::felm(formula = fit_formula,
+                            data = frame_df_sim,
+                            weights = unlist(frame_df[, IPW]))),
+                robust = robust)$coefficients, rownames = "variable")[,c(1:3)]
+
+            colnames(.temp) <- col_names[1:3]
+
             dplyr::select(
-              dplyr::mutate(
-                tibble::as_tibble(
-                  summary(
-                    suppressWarnings(
-                      lfe::felm(formula = fit_formula,
-                                data = frame_df_sim,
-                                weights = unlist(frame_df_sim[, IPW]))),
-                    robust = robust)$coefficients, rownames = "variable")[,c(1:3)],
-                tstat = ifelse(`Std. Error` == 0, 0, Estimate/`Std. Error`)), tstat)
+              dplyr::mutate(.temp, tstat = ifelse(std.error == 0, 0, estimate/std.error)),
+              tstat)
           },
           simplify = FALSE,
           cl = 2)
@@ -248,11 +262,11 @@ analyses <- function(DV,
       sim <- dplyr::bind_cols(sim)
 
       for (i in 1:nrow(estout)) {
-        estout$`Pr(>|t|)`[i] <- min(2 * min(mean(unlist(sim[i,]) <= estout[i,"tstat"]),
-                                            mean(unlist(sim[i,]) >= estout[i,"tstat"])))
+        estout$p.value[i] <- min(2 * min(mean(unlist(sim[i,]) <= estout[i,"tstat"]),
+                                         mean(unlist(sim[i,]) >= estout[i,"tstat"])))
       }
 
-      estout$`Std. Error` <- NA
+      estout$std.error <- NA
       estout <- dplyr::select(estout, -tstat)
 
     }
@@ -397,23 +411,24 @@ analyses <- function(DV,
 
     estout <- fit[, col_names]
 
-  } else {
-    # FE as-if in Stata
-    # if (!is.null(FE)) {
-    #     icpt <- unname(plyr::name_rows( lfe::getfe(fit, ef = function(gamma,
-    #         addnames) absorb(gamma = gamma, addnames = addnames,
-    #         FE = frame_df[, FE]), se = T, bN = 1000, cluster = TRUE)))
-    #     icpt <- cbind(icpt[c(5, 1, 4)], pval = 2 * stats::pt(unlist(icpt[1])/unlist(icpt[4]),
-    #         df = suppressWarnings(broom::glance(fit)[, "df"]),
-    #         lower.tail = FALSE))
-    #     colnames(icpt) <- col_names
-    #     estout <- rbind(icpt, suppressWarnings(broom::tidy(fit)[,
-    #         col_names]))
-    # }
-    # else {
-    estout <- estout
-    colnames(estout) <- col_names
   }
+  # else {
+  #   # FE as-if in Stata
+  #   # if (!is.null(FE)) {
+  #   #     icpt <- unname(plyr::name_rows( lfe::getfe(fit, ef = function(gamma,
+  #   #         addnames) absorb(gamma = gamma, addnames = addnames,
+  #   #         FE = frame_df[, FE]), se = T, bN = 1000, cluster = TRUE)))
+  #   #     icpt <- cbind(icpt[c(5, 1, 4)], pval = 2 * stats::pt(unlist(icpt[1])/unlist(icpt[4]),
+  #   #         df = suppressWarnings(broom::glance(fit)[, "df"]),
+  #   #         lower.tail = FALSE))
+  #   #     colnames(icpt) <- col_names
+  #   #     estout <- rbind(icpt, suppressWarnings(broom::tidy(fit)[,
+  #   #         col_names]))
+  #   # }
+  #   # else {
+  #   estout <- estout
+  #   colnames(estout) <- col_names
+  # }
 
   estout <- estout[!grepl(pattern = "(Intercept)", x = estout$term, fixed = TRUE),]
   if (treat_only) estout <- estout[grepl(pattern = paste(paste0("^", treat, "$"), collapse = "|"), x = estout$term),]
