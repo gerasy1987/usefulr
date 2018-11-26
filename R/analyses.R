@@ -262,7 +262,7 @@ analyses <- function(DV,
 
       for (i in 1:nrow(estout)) {
         estout$p.value[i] <- min(2 * min(mean(unlist(sim[i,]) <= unlist(estout[i,"tstat"])),
-                                         mean(unlist(sim[i,]) >= unlist(estout[i,"tstat"]))))
+                                         mean(unlist(sim[i,]) >= unlist(estout[i,"tstat"]))), 1)
       }
 
       estout$std.error <- NA
@@ -430,7 +430,7 @@ analyses <- function(DV,
   # }
 
   estout <- estout[!grepl(pattern = "(Intercept)", x = estout$term, fixed = TRUE),]
-  if (treat_only) estout <- estout[grepl(pattern = paste(paste0("^", treat, "$"), collapse = "|"), x = estout$term),]
+  if (treat_only) estout <- estout[grepl(pattern = paste(paste0(treat), collapse = "|"), x = estout$term),]
 
 
 
