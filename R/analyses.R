@@ -20,6 +20,7 @@
 #' @param round_digits Integer. How many decimal points to round to in the output.
 #' @param return_df If \code{TRUE} dataframe used for estimation will be returned.
 #' @param seed Numeric. RNG seed.
+#' @param cores Numeric from 1 to 4. Number of cores used for parallel processing.
 #' @return List of three objects. \code{estimates} is estimates from the model and corresponding standard errors. \code{stat} is vector of adjusted R squared and number of observations. \code{model_spec} is logical vector of characteristics of the model.
 #' @examples
 #' \dontrun{
@@ -65,7 +66,8 @@ analyses <- function(DV,
                      stars = FALSE,
                      round_digits = 3,
                      return_df = FALSE,
-                     seed = 12345) {
+                     seed = 12345,
+                     cores = 4) {
 
   # required packages
   requireNamespace("plyr", quietly = TRUE)
@@ -181,7 +183,7 @@ analyses <- function(DV,
                 tstat)
             },
             simplify = FALSE,
-            cl = 2)
+            cl = cores)
 
       } else if (is.null(IPW) & !is.null(FE)) {
 
@@ -206,7 +208,7 @@ analyses <- function(DV,
               tstat)
           },
           simplify = FALSE,
-          cl = 2)
+          cl = cores)
 
       } else if (!is.null(IPW) & is.null(FE)) {
 
@@ -231,7 +233,7 @@ analyses <- function(DV,
               tstat)
           },
           simplify = FALSE,
-          cl = 2)
+          cl = cores)
 
       } else if (!is.null(IPW) & !is.null(FE)) {
 
@@ -257,7 +259,7 @@ analyses <- function(DV,
               tstat)
           },
           simplify = FALSE,
-          cl = 2)
+          cl = cores)
 
       }
 
