@@ -8,13 +8,14 @@
 #' @param .print_status Logical. Whether to print status of the model.
 #' @param .pad Integer number for output table padding.
 #' @param .col_print Number of columns to split by. Defaults to 5.
-#' @param .latex_colwidth If .type = "latex", character string specifying column width and alignment. Defaults to ">{\\centering\\arraybackslash\\hsize=.5\\hsize}X".
-#' @param .latex_scalebox If .type = "latex", numeric value for latex table rescaling. Defaults to 0.9.
-#' @param .latex_size If .type = "latex", character string specifying font size for latex table. Defaults to "footnotesize".
-#' @param .latex_spacing If .type = "latex", character string specifying the latex code to be inserted between estimate and standard error in table. Defaults to "\\hspace{0.2in}"
-#' @param .latex_sanitize If .type = "latex", function specifying the text sanitizing function for table.
-#' @param .latex_floating If type="latex", first element of list, logical, defines whether the latex table will be floating, while the second element of list defines the floating environment. Defaults to list(TRUE, "table").
-#' @param .latex_placement If type="latex", character string specifying table floating placement. Defaults to "H".
+#' @param .add_rows matrix to add to the main output.
+#' param .latex_colwidth If .type = "latex", character string specifying column width and alignment. Defaults to ">{\\centering\\arraybackslash\\hsize=.5\\hsize}X".
+#' param .latex_scalebox If .type = "latex", numeric value for latex table rescaling. Defaults to 0.9.
+#' param .latex_size If .type = "latex", character string specifying font size for latex table. Defaults to "footnotesize".
+#' param .latex_spacing If .type = "latex", character string specifying the latex code to be inserted between estimate and standard error in table. Defaults to "\\hspace{0.2in}"
+#' param .latex_sanitize If .type = "latex", function specifying the text sanitizing function for table.
+#' param .latex_floating If type="latex", first element of list, logical, defines whether the latex table will be floating, while the second element of list defines the floating environment. Defaults to list(TRUE, "table").
+#' param .latex_placement If type="latex", character string specifying table floating placement. Defaults to "H".
 #' @return Markdown or LaTeX table of estimated models.
 #' @examples
 #' \dontrun{
@@ -40,7 +41,8 @@ table_fun <- function(.table_list,
                       .print_status = FALSE,
                       .type = getOption("usefulr.type", "markdown"),
                       .pad = getOption("usefulr.html_pad", 0),
-                      .col_print = getOption("usefulr.html_col", 5) #,
+                      .col_print = getOption("usefulr.html_col", 5),
+                      .add_rows = NULL #,
                       # .latex_colwidth = getOption("usefulr.latex_colwidth",
                       #                             ">{\\centering\\arraybackslash\\hsize=.5\\hsize}X"),
                       # .latex_scalebox = getOption("usefulr.latex_scalebox", 1),
@@ -117,10 +119,14 @@ table_fun <- function(.table_list,
 
   .out_tab <- ifelse(is.na(.out_tab), "", .out_tab)
 
+  if (ncol(.out_tab) != ncol(.add_cols)) stop(".add_cols has wrong number of columns")
+
+  .out_tab <- rbind(.out_tab, .add_rows)
+
   .list_out <- list()
 
   if (.type == "latex") {
-    rownames(.out_tab) <- c(.row_names, "Model" , "FE", "Clustered SE", "IPW")
+    rownames(.out_tab) <- c(.row_names, "Model" , "FE", "Clustered SE", "IPW", rownames(.add_rows))
     .list_out[[1]] <-
       knitr::kable(x = .out_tab, format = .type,
                    caption = .title,
@@ -142,7 +148,8 @@ table_fun <- function(.table_list,
   } else {
     .split_tab <- base::split(1:dim(.out_tab)[2], base::ceiling(1:dim(.out_tab)[2]/.col_print))
     for (i in 1:length(.split_tab)) {
-      .temp <- cbind(c(.row_names, "Model",  "FE", "Clustered SE", "IPW"), .out_tab[, .split_tab[[i]]])
+      .temp <- cbind(c(.row_names, "Model",  "FE", "Clustered SE", "IPW", rownames(.add_rows)),
+                     .out_tab[, .split_tab[[i]]])
       colnames(.temp) <- c("", .col_names[.split_tab[[i]]])
       .list_out[[i]] <-
           knitr::kable(x = .temp, format = .type,
@@ -160,7 +167,6 @@ table_fun <- function(.table_list,
 
 #' @export
 print.table_list <- function(table_list) {
-
   for (i in 1:length(table_list)) {
     print(table_list[[i]])
   }
