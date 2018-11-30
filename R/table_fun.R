@@ -126,7 +126,8 @@ table_fun <- function(.table_list,
                    caption = .title,
                    align = rep("c", ncol(.out_tab)),
                    escape = FALSE,
-                   booktabs = TRUE)
+                   booktabs = TRUE,
+                   linesep = "")
       # xtable::print.xtable(x = xtable::xtable(x = .out_tab,
       #                                         align = c("X", rep(.latex_colwidth, (ncol(.out_tab)))),
       #                                         caption = .title), sanitize.text.function = .latex_sanitize,
