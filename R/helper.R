@@ -29,13 +29,22 @@ listn <- function(...) {
 #' @return RETURN_DESCRIPTION
 #' @examples
 #' # ADD_EXAMPLES_HERE
-add_stars <- function(p.value) {
-  return(
-    ifelse(p.value <= 0.01, "***",
-           ifelse(p.value <= 0.05, "**",
-                  ifelse(p.value <= 0.1,"*",
-                         ifelse(p.value <= 0.15, "+", ""))))
-  )
+add_stars <- function(p.value, type = "html") {
+
+  if (type == "latex") {
+    return(
+      ifelse(p.value <= 0.01, "$^{***}$",
+             ifelse(p.value <= 0.05, "$^{**}$",
+                    ifelse(p.value <= 0.1,"$^{*}$", "")))
+    )
+  } else {
+    return(
+      ifelse(p.value <= 0.01, "***",
+             ifelse(p.value <= 0.05, "**",
+                    ifelse(p.value <= 0.1,"*", "")))
+    )
+  }
+
 }
 
 #' FUNCTION_TITLE

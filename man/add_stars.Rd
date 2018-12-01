@@ -4,7 +4,7 @@
 \alias{add_stars}
 \title{FUNCTION_TITLE}
 \usage{
-add_stars(p.value)
+add_stars(p.value, type = "html")
 }
 \arguments{
 \item{p.value}{DESCRIPTION.}

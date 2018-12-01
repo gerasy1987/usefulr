@@ -9,6 +9,8 @@
 #' @param .pad Integer number for output table padding.
 #' @param .col_print Number of columns to split by. Defaults to 5.
 #' @param .add_rows matrix to add to the main output.
+#' @param .add_stars Logical. Whether to add statistical significance stars
+#' @param .round_digits Numeric. The rounding of report is done up to 10^{-.round_digits}.
 #' param .latex_colwidth If .type = "latex", character string specifying column width and alignment. Defaults to ">{\\centering\\arraybackslash\\hsize=.5\\hsize}X".
 #' param .latex_scalebox If .type = "latex", numeric value for latex table rescaling. Defaults to 0.9.
 #' param .latex_size If .type = "latex", character string specifying font size for latex table. Defaults to "footnotesize".
@@ -42,7 +44,9 @@ table_fun <- function(.table_list,
                       .type = getOption("usefulr.type", "markdown"),
                       .pad = getOption("usefulr.html_pad", 0),
                       .col_print = getOption("usefulr.html_col", 5),
-                      .add_rows = NULL #,
+                      .add_rows = NULL,
+                      .add_stars = FALSE,
+                      .round_digits = 3 #,
                       # .latex_colwidth = getOption("usefulr.latex_colwidth",
                       #                             ">{\\centering\\arraybackslash\\hsize=.5\\hsize}X"),
                       # .latex_scalebox = getOption("usefulr.latex_scalebox", 1),
@@ -77,7 +81,32 @@ table_fun <- function(.table_list,
   if (is.null(dim(.table_list))) {
     if (length(.col_names) > 1)
       stop("Mismatch in length of col_names and number of columns in table_list")
-    .est_tab <- .table_list$estimates[, "printout"]
+
+    if (.add_stars) {
+      .est_tab <-
+        dplyr::mutate(.table_list$estimates,
+                      printout =
+                        ifelse(is.nan(estimate), "-- [--]",
+                               ifelse(is.na(std.error),
+                                      paste0(fround(estimate, digits = round_digits),
+                                             add_stars(p.value, type = .type),
+                                             " [", fround(p.value, digits = round_digits), "]"),
+                                      paste0(fround(estimate, digits = round_digits),
+                                             add_stars(p.value, type = .type),
+                                             " [", fround(std.error, digits = round_digits), "]"))))
+    } else if (!.add_stars) {
+      .est_tab <-
+        dplyr::mutate(.table_list$estimates,
+                      printout =
+                        ifelse(is.nan(estimate), "-- [--]",
+                               ifelse(is.na(std.error),
+                                      paste0(fround(estimate, digits = .round_digits),
+                                             " [", fround(p.value, digits = .round_digits), "]"),
+                                      paste0(fround(estimate, digits = round_digits),
+                                             " [", fround(std.error, digits = .round_digits), "]"))))
+    }
+
+    .est_tab <- .est_tab[, "printout"]
 
     .stat_tab <- unname(.table_list$stat[c(2,1)])
     .spec_tab <- unname(.table_list$model_spec[c(1,3:5)])
