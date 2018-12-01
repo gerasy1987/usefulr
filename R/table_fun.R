@@ -116,6 +116,34 @@ table_fun <- function(.table_list,
     if (length(.col_names) != dim(.table_list)[2])
       stop("Mismatch in length of col_names and number of columns in table_list")
 
+    .table_list["estimates", ] <-
+      lapply(.table_list["estimates", ], function(x) {
+        if (.add_stars) {
+          x <-
+            dplyr::mutate(x,
+                          printout =
+                            ifelse(is.nan(estimate), "-- [--]",
+                                   ifelse(is.na(std.error),
+                                          paste0(fround(estimate, digits = round_digits),
+                                                 add_stars(p.value, type = .type),
+                                                 " [", fround(p.value, digits = round_digits), "]"),
+                                          paste0(fround(estimate, digits = round_digits),
+                                                 add_stars(p.value, type = .type),
+                                                 " [", fround(std.error, digits = round_digits), "]"))))
+        } else if (!.add_stars) {
+          x <-
+            dplyr::mutate(x,
+                          printout =
+                            ifelse(is.nan(estimate), "-- [--]",
+                                   ifelse(is.na(std.error),
+                                          paste0(fround(estimate, digits = .round_digits),
+                                                 " [", fround(p.value, digits = .round_digits), "]"),
+                                          paste0(fround(estimate, digits = round_digits),
+                                                 " [", fround(std.error, digits = .round_digits), "]"))))
+        }
+        return(x)
+      })
+
     .est_tab <- as.matrix(suppressWarnings(base::Reduce(f = function(dtf1,
                                                                      dtf2) {
       base::merge(dtf1, dtf2, by = "term", all = T, suffixes = c(1:10),
