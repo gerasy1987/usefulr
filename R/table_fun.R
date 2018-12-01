@@ -88,12 +88,12 @@ table_fun <- function(.table_list,
                       printout =
                         ifelse(is.nan(estimate), "-- [--]",
                                ifelse(is.na(std.error),
-                                      paste0(fround(estimate, digits = round_digits),
+                                      paste0(fround(estimate, digits = .round_digits),
                                              add_stars(p.value, type = .type),
-                                             " [", fround(p.value, digits = round_digits), "]"),
-                                      paste0(fround(estimate, digits = round_digits),
+                                             " [", fround(p.value, digits = .round_digits), "]"),
+                                      paste0(fround(estimate, digits = .round_digits),
                                              add_stars(p.value, type = .type),
-                                             " [", fround(std.error, digits = round_digits), "]"))))
+                                             " [", fround(std.error, digits = .round_digits), "]"))))
     } else if (!.add_stars) {
       .est_tab <-
         dplyr::mutate(.table_list$estimates,
@@ -102,7 +102,7 @@ table_fun <- function(.table_list,
                                ifelse(is.na(std.error),
                                       paste0(fround(estimate, digits = .round_digits),
                                              " [", fround(p.value, digits = .round_digits), "]"),
-                                      paste0(fround(estimate, digits = round_digits),
+                                      paste0(fround(estimate, digits = .round_digits),
                                              " [", fround(std.error, digits = .round_digits), "]"))))
     }
 
@@ -124,12 +124,12 @@ table_fun <- function(.table_list,
                           printout =
                             ifelse(is.nan(estimate), "-- [--]",
                                    ifelse(is.na(std.error),
-                                          paste0(fround(estimate, digits = round_digits),
+                                          paste0(fround(estimate, digits = .round_digits),
                                                  add_stars(p.value, type = .type),
                                                  " [", fround(p.value, digits = round_digits), "]"),
-                                          paste0(fround(estimate, digits = round_digits),
+                                          paste0(fround(estimate, digits = .round_digits),
                                                  add_stars(p.value, type = .type),
-                                                 " [", fround(std.error, digits = round_digits), "]"))))
+                                                 " [", fround(std.error, digits = .round_digits), "]"))))
         } else if (!.add_stars) {
           x <-
             dplyr::mutate(x,
@@ -138,7 +138,7 @@ table_fun <- function(.table_list,
                                    ifelse(is.na(std.error),
                                           paste0(fround(estimate, digits = .round_digits),
                                                  " [", fround(p.value, digits = .round_digits), "]"),
-                                          paste0(fround(estimate, digits = round_digits),
+                                          paste0(fround(estimate, digits = .round_digits),
                                                  " [", fround(std.error, digits = .round_digits), "]"))))
         }
         return(x)
