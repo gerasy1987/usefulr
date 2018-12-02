@@ -18,6 +18,8 @@ stata_sum <- function(.vars,
   requireNamespace("dplyr")
   requireNamespace("tidyr")
 
+  if (length(unique(.vars)) != length(.vars)) stop("Non-unique variable names are provided.")
+
   if (is.null(.by)) {
 
     .data %>%
@@ -34,7 +36,8 @@ stata_sum <- function(.vars,
                                !!paste0("p",100*max(.percentile)) := quantile(., probs = max(.percentile), na.rm = TRUE, type = 2),
                                max = max(., na.rm = TRUE),
                                NAs = sum(is.na(.)),
-                               unique = length(unique(.))))
+                               unique = length(unique(.)))) %>%
+      {.[base::match(.$variable, .vars),]}
 
   } else if (!is.null(.by)) {
 
@@ -52,7 +55,8 @@ stata_sum <- function(.vars,
                                !!paste0("p",100*max(.percentile)) := quantile(., probs = max(.percentile), na.rm = TRUE, type = 2),
                                max = max(., na.rm = TRUE),
                                NAs = sum(is.na(.)),
-                               unique = length(unique(.))))
+                               unique = length(unique(.)))) %>%
+      {.[base::match(.$variable, .vars),]}
 
   }
 }
