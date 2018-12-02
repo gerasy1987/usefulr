@@ -37,7 +37,7 @@ stata_sum <- function(.vars,
                                max = max(., na.rm = TRUE),
                                NAs = sum(is.na(.)),
                                unique = length(unique(.)))) %>%
-      {.[base::match(.$variable, .vars),]}
+      {.[order(base::match(.$variable, .vars)),]}
 
   } else if (!is.null(.by)) {
 
@@ -56,7 +56,7 @@ stata_sum <- function(.vars,
                                max = max(., na.rm = TRUE),
                                NAs = sum(is.na(.)),
                                unique = length(unique(.)))) %>%
-      {.[base::match(.$variable, .vars),]}
+      {.[order(base::match(.$variable, .vars)),]}
 
   }
 }
