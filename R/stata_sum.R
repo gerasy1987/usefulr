@@ -36,7 +36,7 @@ stata_sum <- function(.vars,
                                !!paste0("p",100*max(.percentile)) := quantile(., probs = max(.percentile), na.rm = TRUE, type = 2),
                                max = max(., na.rm = TRUE),
                                NAs = sum(is.na(.)),
-                               unique = length(unique(.)))) %>%
+                               unique = length(unique(na.omit(.))))) %>%
       {.[order(base::match(.$variable, .vars)),]}
 
   } else if (!is.null(.by)) {
@@ -55,7 +55,7 @@ stata_sum <- function(.vars,
                                !!paste0("p",100*max(.percentile)) := quantile(., probs = max(.percentile), na.rm = TRUE, type = 2),
                                max = max(., na.rm = TRUE),
                                NAs = sum(is.na(.)),
-                               unique = length(unique(.)))) %>%
+                               unique = length(unique(na.omit(.))))) %>%
       {.[order(base::match(.$variable, .vars)),]}
 
   }
