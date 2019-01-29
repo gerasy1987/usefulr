@@ -5,9 +5,10 @@
 \title{Estimation Function}
 \usage{
 analyses2(dv, treat, covs = NULL, heterogenous = NULL, FE = NULL,
-  IPW = NULL, cluster = NULL, robust = is.null(cluster), data,
-  subset = NULL, estimate, treat_only = FALSE, status = NULL,
-  stars = FALSE, round_digits = 3, return_df = FALSE, ...)
+  IPW = NULL, IV_list = NULL, cluster = NULL,
+  robust = is.null(cluster), data, subset = NULL, estimate,
+  treat_only = FALSE, status = NULL, stars = FALSE,
+  round_digits = 3, return_df = FALSE, ...)
 }
 \arguments{
 \item{dv}{Dependent variable specified as character.}
@@ -21,6 +22,8 @@ analyses2(dv, treat, covs = NULL, heterogenous = NULL, FE = NULL,
 \item{FE}{Character vector of fixed effects covariates specified as character vector.}
 
 \item{IPW}{Inverse probability weights specified as character vector.}
+
+\item{IV_list}{Character string. Should be a character string which presents valid IV formula as specified in \code{lfe::felm}.}
 
 \item{cluster}{Covariate for clustered robust standard errors as defined by \code{multiwayvcov::cluster.vcov} function. Currently only one clustering variable option supported specified as character vector.}
 

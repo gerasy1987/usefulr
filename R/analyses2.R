@@ -7,6 +7,7 @@
 #' @param subset character string specifing logical expression for subsetting.
 #' @param FE Character vector of fixed effects covariates specified as character vector.
 #' @param IPW Inverse probability weights specified as character vector.
+#' @param IV_list Character string. Should be a character string which presents valid IV formula as specified in \code{lfe::felm}.
 #' @param cluster Covariate for clustered robust standard errors as defined by \code{multiwayvcov::cluster.vcov} function. Currently only one clustering variable option supported specified as character vector.
 #' @param robust Logical. Whether to report heteroskedastic robust standard errors. Implemented only for linear models for now.
 #' @param data Data frame which contains all the relevant variables.
@@ -35,6 +36,7 @@ analyses2 <- function(dv,
                      heterogenous = NULL,
                      FE = NULL,
                      IPW = NULL,
+                     IV_list = NULL,
                      cluster = NULL,
                      robust = is.null(cluster),
                      data,
@@ -52,15 +54,6 @@ analyses2 <- function(dv,
   requireNamespace("dplyr", quietly = TRUE)
   requireNamespace("broom", quietly = TRUE)
   requireNamespace("lmtest", quietly = TRUE)
-
-  if (model != "lm" & is.null(cluster) & robust)
-    warning("Heteroskedastic robust SE are only implemented for model = 'lm' at this moment. Regular SE will be reported.\n")
-
-  if (model != "lm" & !is.null(IV_list))
-    warning("Instrumental variables are only implemented for model = 'lm' at this time. No instrumental variable estimates are reported.\n")
-
-  if (model != "lm" & !is.null(ri))
-    warning("RI p-values are only implemented for model = 'lm' at this time. Parametric SE are reported instead.\n")
 
   frame_formula <-
     stats::as.formula(paste(dv, "~", paste(unique(c(treat, covs, FE, cluster, IPW,
@@ -110,28 +103,31 @@ analyses2 <- function(dv,
 
   col_names <- c("term", "estimate", "std.error", "p.value")
 
-  estout <- estimate(dv,
-                     treat,
-                     covs,
-                     heterogenous,
-                     FE,
-                     IPW,
-                     cluster,
-                     robust,
-                     data,
-                     subset,
-                     fit_formula,
-                     frame_df,
-                     col_names,
+  estout <- estimate(dv = dv,
+                     treat = treat,
+                     covs = covs,
+                     heterogenous = heterogenous,
+                     FE = FE,
+                     IPW = IPW,
+                     IV_list = IV_list,
+                     cluster = cluster,
+                     robust = robust,
+                     data = data,
+                     subset = subset,
+                     fit_formula = fit_formula,
+                     frame_df = frame_df,
+                     col_names = col_names,
                      ...)
 
   # check consistency of estout format
   missing_col_names <- setdiff(col_names, names(estout))
 
-  if (missing_col_names != "std.error")
-    stop("estimate function has to return tibble with 'term', 'estimate' and 'p.value' columns.")
+  if (length(missing_col_names) != 0) {
+    if (missing_col_names != "std.error")
+      stop("estimate function has to return tibble with 'term', 'estimate' and 'p.value' columns.")
 
-  if (missing_col_names == "std.error") estout$std.error <- NA
+    if (missing_col_names == "std.error") estout$std.error <- NA
+  }
 
   # cleanup estout
   estout <- estout[!grepl(pattern = "Intercept", x = estout$term, fixed = TRUE),]
@@ -175,12 +171,13 @@ analyses2 <- function(dv,
 
   list_out <-
     list(estimates = out,
-         stat = c(r.squared =
-                    ifelse(test = (model == "lm"),
-                           yes = fround(summary(fit)$r2adj, digits = 3),
-                           no = fround(r2_log_prob, digits = 3)),
-                  n_obs = fround(nrow(frame_df), digits = 0)),
-         model_spec = c(MODEL = model,
+         stat = c(
+           r.squared = NA,
+           #   ifelse(test = (model == "lm"),
+           #          yes = fround(summary(fit)$r2adj, digits = 3),
+           #          no = fround(r2_log_prob, digits = 3)),
+           n_obs = fround(nrow(frame_df), digits = 0)),
+         model_spec = c(MODEL = paste0(quote(estimate)),
                         HETEROGENOUS =
                           ifelse(!is.null(heterogenous),
                                  paste(heterogenous, collapse = ", "), NA),
@@ -194,11 +191,8 @@ analyses2 <- function(dv,
                                        1, "yes", "no"), S = ifelse(status[2] == 1, "yes", "no"),
                           P = ifelse(status[3] == 1, "yes", "no")),
          internals = list(data = if (return_df) frame_df else NULL,
-                          estfun_formula =
-                            ifelse((model == "lm"),
-                                   paste(main_formula, "|",
-                                         FE_formula, "|", IV_formula, "|", cluster_formula),
-                                   main_formula_FE)))
+                          estfun_formula = main_formula_FE)
+         )
 
 
   return(structure(list_out,

@@ -1,9 +1,5 @@
 
-
-
 #' OLS Estimator
-#'
-#' FUNCTION_DESCRIPTION
 #'
 #' @param frame_df DESCRIPTION.
 #' @param fit_formula DESCRIPTION.

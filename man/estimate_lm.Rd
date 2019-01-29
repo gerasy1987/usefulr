@@ -23,7 +23,7 @@ estimate_lm(frame_df, fit_formula, IPW, robust, col_names, ...)
 RETURN_DESCRIPTION
 }
 \description{
-FUNCTION_DESCRIPTION
+OLS Estimator
 }
 \examples{
 # ADD_EXAMPLES_HERE
