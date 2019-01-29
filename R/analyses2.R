@@ -1,0 +1,207 @@
+#' Estimation Function
+#'
+#' @param dv Dependent variable specified as character.
+#' @param treat Treatment vector of variables specified as character vector.
+#' @param covs Character vector of covariates specified as character vector.
+#' @param heterogenous Character vector of covariates to interact with treatments specified as character vector.
+#' @param subset character string specifing logical expression for subsetting.
+#' @param FE Character vector of fixed effects covariates specified as character vector.
+#' @param IPW Inverse probability weights specified as character vector.
+#' @param cluster Covariate for clustered robust standard errors as defined by \code{multiwayvcov::cluster.vcov} function. Currently only one clustering variable option supported specified as character vector.
+#' @param robust Logical. Whether to report heteroskedastic robust standard errors. Implemented only for linear models for now.
+#' @param data Data frame which contains all the relevant variables.
+#' @param estimate Function that takes all arguments above, \code{fit_formula} and \code{frame_df} as arguments and returns a tibble with the following columns: "term" (required), "estimate" (required), "std.error" (optional), "p.value" (required).
+#' @param treat_only Logical vector of length 1, specifying whether only \code{treat} estimates should be reported. Defaults to \code{FALSE}.
+#' @param status Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.
+#' @param stars Logical. If \code{FALSE} no stars are passed to printout.
+#' @param round_digits Integer. How many decimal points to round to in the output.
+#' @param return_df If \code{TRUE} dataframe used for estimation will be returned.
+#' @param ... Other parameters used in estimate function
+#' @return List of three objects. \code{estimates} is estimates from the model and corresponding standard errors. \code{stat} is vector of adjusted R squared and number of observations. \code{model_spec} is logical vector of characteristics of the model.
+#' @examples
+#'
+#' @import dplyr broom
+#' @importFrom lfe felm
+#' @importFrom multiwayvcov cluster.vcov
+#' @importFrom lmtest coeftest
+#' @importFrom MASS polr
+#' @importFrom margins margins
+#' @export
+
+
+analyses2 <- function(dv,
+                     treat,
+                     covs = NULL,
+                     heterogenous = NULL,
+                     FE = NULL,
+                     IPW = NULL,
+                     cluster = NULL,
+                     robust = is.null(cluster),
+                     data,
+                     subset = NULL,
+                     estimate,
+                     treat_only = FALSE,
+                     status = NULL,
+                     stars = FALSE,
+                     round_digits = 3,
+                     return_df = FALSE,
+                     ...) {
+
+  # required packages
+  requireNamespace("plyr", quietly = TRUE)
+  requireNamespace("dplyr", quietly = TRUE)
+  requireNamespace("broom", quietly = TRUE)
+  requireNamespace("lmtest", quietly = TRUE)
+
+  if (model != "lm" & is.null(cluster) & robust)
+    warning("Heteroskedastic robust SE are only implemented for model = 'lm' at this moment. Regular SE will be reported.\n")
+
+  if (model != "lm" & !is.null(IV_list))
+    warning("Instrumental variables are only implemented for model = 'lm' at this time. No instrumental variable estimates are reported.\n")
+
+  if (model != "lm" & !is.null(ri))
+    warning("RI p-values are only implemented for model = 'lm' at this time. Parametric SE are reported instead.\n")
+
+  frame_formula <-
+    stats::as.formula(paste(dv, "~", paste(unique(c(treat, covs, FE, cluster, IPW,
+                                                    heterogenous, IV_list$dv, IV_list$instr)),
+                                           collapse = " + ")))
+  if (is.null(heterogenous)) {
+    main_formula <- paste(c(treat, covs), collapse = " + ")
+  } else {
+    main_formula <- paste(c(treat, paste0(treat, ":", heterogenous),
+                            heterogenous, covs), collapse = " + ")
+  }
+  main_formula    <- paste(dv, "~", main_formula)
+  main_formula_FE <-
+    ifelse(!is.null(FE),
+           paste0(main_formula, paste0(paste0(" + factor(", FE, ")"), collapse = "")),
+           main_formula)
+  FE_formula      <- ifelse(is.null(FE), 0, paste(FE, collapse = "+"))
+  if (!is.null(IV_list)) {
+    IV_formula <- paste("(",
+                        paste0(IV_list$dv, collapse = "|"), "~",
+                        paste0(ifelse(test = IV_list$factor,
+                                      yes = paste0("factor(", IV_list$instr, ")"),
+                                      no = IV_list$instr), collapse = "+"),
+                        ")")
+  } else {
+    IV_formula <- 0
+  }
+  cluster_formula <- ifelse(is.null(cluster), 0, paste(cluster,
+                                                       collapse = "+"))
+  fit_formula <- stats::as.formula(paste(main_formula, "|",
+                                         FE_formula, "|", IV_formula, "|", cluster_formula))
+
+  frame_df <- eval(parse(text = paste0("dplyr::filter(.data = data, ", subset, ")")))
+  frame_df <- eval(parse(text = paste0("dplyr::filter(.data = frame_df, ",
+                                       paste(
+                                         paste0("!is.na(",
+                                                unique(c(treat, dv, FE, cluster, IPW, heterogenous,
+                                                         IV_list$dv, IV_list$instr)), ")"),
+                                         collapse = " & "), ")" )))
+  frame_df <- stats::model.frame(frame_formula, data = frame_df)
+
+  if (length(FE) > 1) frame_df[, FE] <- (plyr::colwise(as.factor))(frame_df[, FE])
+  if (length(FE) == 1) frame_df[, FE] <- as.factor(frame_df[, FE])
+
+
+  # ESTIMATION
+
+  col_names <- c("term", "estimate", "std.error", "p.value")
+
+  estout <- estimate(dv,
+                     treat,
+                     covs,
+                     heterogenous,
+                     FE,
+                     IPW,
+                     cluster,
+                     robust,
+                     data,
+                     subset,
+                     fit_formula,
+                     frame_df,
+                     col_names,
+                     ...)
+
+  # check consistency of estout format
+  missing_col_names <- setdiff(col_names, names(estout))
+
+  if (missing_col_names != "std.error")
+    stop("estimate function has to return tibble with 'term', 'estimate' and 'p.value' columns.")
+
+  if (missing_col_names == "std.error") estout$std.error <- NA
+
+  # cleanup estout
+  estout <- estout[!grepl(pattern = "Intercept", x = estout$term, fixed = TRUE),]
+  if (treat_only) estout <- estout[grepl(pattern = paste(paste0(treat), collapse = "|"), x = estout$term),]
+
+  # add stars and printout column
+  if (stars) {
+    out <-
+      dplyr::mutate(estout,
+                    printout =
+                      ifelse(is.nan(estimate), "-- [--]",
+                             ifelse(is.na(std.error),
+                                    paste0(fround(estimate, digits = round_digits),
+                                           add_stars(p.value),
+                                           " [", fround(p.value, digits = round_digits), "]"),
+                                    paste0(fround(estimate, digits = round_digits),
+                                           add_stars(p.value),
+                                           " [", fround(std.error, digits = round_digits), "]"))),
+                    estimate = round(estimate, digits = round_digits),
+                    std.error = round(std.error, digits = round_digits),
+                    p.value = round(p.value, digits = round_digits))
+  } else if (!stars) {
+    out <-
+      dplyr::mutate(estout,
+                    printout =
+                      ifelse(is.nan(estimate), "-- [--]",
+                             ifelse(is.na(std.error),
+                                    paste0(fround(estimate, digits = round_digits),
+                                           " [", fround(p.value, digits = round_digits), "]"),
+                                    paste0(fround(estimate, digits = round_digits),
+                                           " [", fround(std.error, digits = round_digits), "]"))),
+                    estimate = round(estimate, digits = round_digits),
+                    std.error = round(std.error, digits = round_digits),
+                    p.value = round(p.value, digits = round_digits))
+  }
+
+
+
+  out <- dplyr::select(.data = out,
+                       term, estimate, std.error, printout, p.value)
+
+  list_out <-
+    list(estimates = out,
+         stat = c(r.squared =
+                    ifelse(test = (model == "lm"),
+                           yes = fround(summary(fit)$r2adj, digits = 3),
+                           no = fround(r2_log_prob, digits = 3)),
+                  n_obs = fround(nrow(frame_df), digits = 0)),
+         model_spec = c(MODEL = model,
+                        HETEROGENOUS =
+                          ifelse(!is.null(heterogenous),
+                                 paste(heterogenous, collapse = ", "), NA),
+                        FE = ifelse(!is.null(FE),
+                                    paste(FE, collapse = ", "), "no"),
+                        commaCLUSTER = ifelse(!is.null(cluster),
+                                              paste(cluster, collapse = ", "), "no"),
+                        IPW = ifelse(!is.null(IPW),
+                                     paste(IPW, collapse = ", "), "no")),
+         model_status = c(R = ifelse(status[1] ==
+                                       1, "yes", "no"), S = ifelse(status[2] == 1, "yes", "no"),
+                          P = ifelse(status[3] == 1, "yes", "no")),
+         internals = list(data = if (return_df) frame_df else NULL,
+                          estfun_formula =
+                            ifelse((model == "lm"),
+                                   paste(main_formula, "|",
+                                         FE_formula, "|", IV_formula, "|", cluster_formula),
+                                   main_formula_FE)))
+
+
+  return(structure(list_out,
+                   class = c("analyses_list", "list")) )
+
+}
