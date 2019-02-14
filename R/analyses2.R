@@ -104,22 +104,21 @@ analyses2 <- function(dv,
   col_names <- c("term", "estimate", "std.error", "p.value")
 
   estout <-
-    call(estimate,
-         dv = dv,
-         treat = treat,
-         covs = covs,
-         heterogenous = heterogenous,
-         FE = FE,
-         IPW = IPW,
-         IV_list = IV_list,
-         cluster = cluster,
-         robust = robust,
-         data = data,
-         subset = subset,
-         fit_formula = fit_formula,
-         frame_df = frame_df,
-         col_names = col_names,
-         ...)
+    get(estimate)(dv = dv,
+                  treat = treat,
+                  covs = covs,
+                  heterogenous = heterogenous,
+                  FE = FE,
+                  IPW = IPW,
+                  IV_list = IV_list,
+                  cluster = cluster,
+                  robust = robust,
+                  data = data,
+                  subset = subset,
+                  fit_formula = fit_formula,
+                  frame_df = frame_df,
+                  col_names = col_names,
+                  ...)
 
   # check consistency of estout format
   missing_col_names <- setdiff(col_names, names(estout))
