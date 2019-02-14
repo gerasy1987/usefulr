@@ -126,7 +126,7 @@ table_fun <- function(.table_list,
                                    ifelse(is.na(std.error),
                                           paste0(fround(estimate, digits = .round_digits),
                                                  add_stars(p.value, type = .type),
-                                                 " [", fround(p.value, digits = round_digits), "]"),
+                                                 " [", fround(p.value, digits = .round_digits), "]"),
                                           paste0(fround(estimate, digits = .round_digits),
                                                  add_stars(p.value, type = .type),
                                                  " [", fround(std.error, digits = .round_digits), "]"))))
