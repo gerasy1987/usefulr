@@ -178,7 +178,7 @@ analyses2 <- function(dv,
            #          yes = fround(summary(fit)$r2adj, digits = 3),
            #          no = fround(r2_log_prob, digits = 3)),
            n_obs = fround(nrow(frame_df), digits = 0)),
-         model_spec = c(MODEL = paste(deparse(substitute(estimate))),
+         model_spec = c(MODEL = "ols",
                         HETEROGENOUS =
                           ifelse(!is.null(heterogenous),
                                  paste(heterogenous, collapse = ", "), NA),
