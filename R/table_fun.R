@@ -180,7 +180,7 @@ table_fun <- function(.table_list,
     if (ncol(.out_tab) != ncol(.add_rows)) stop(".add_cols has wrong number of columns")
   }
 
-  .out_tab <- rbind(.out_tab, .add_rows)
+  .out_tab <- rbind(.out_tab, unname(.add_rows))
 
   .list_out <- list()
 
