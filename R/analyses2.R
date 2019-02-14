@@ -103,21 +103,23 @@ analyses2 <- function(dv,
 
   col_names <- c("term", "estimate", "std.error", "p.value")
 
-  estout <- estimate(dv = dv,
-                     treat = treat,
-                     covs = covs,
-                     heterogenous = heterogenous,
-                     FE = FE,
-                     IPW = IPW,
-                     IV_list = IV_list,
-                     cluster = cluster,
-                     robust = robust,
-                     data = data,
-                     subset = subset,
-                     fit_formula = fit_formula,
-                     frame_df = frame_df,
-                     col_names = col_names,
-                     ...)
+  estout <-
+    call(estimate,
+         dv = dv,
+         treat = treat,
+         covs = covs,
+         heterogenous = heterogenous,
+         FE = FE,
+         IPW = IPW,
+         IV_list = IV_list,
+         cluster = cluster,
+         robust = robust,
+         data = data,
+         subset = subset,
+         fit_formula = fit_formula,
+         frame_df = frame_df,
+         col_names = col_names,
+         ...)
 
   # check consistency of estout format
   missing_col_names <- setdiff(col_names, names(estout))
@@ -177,7 +179,7 @@ analyses2 <- function(dv,
            #          yes = fround(summary(fit)$r2adj, digits = 3),
            #          no = fround(r2_log_prob, digits = 3)),
            n_obs = fround(nrow(frame_df), digits = 0)),
-         model_spec = c(MODEL = paste0(quote(estimate)),
+         model_spec = c(MODEL = estimate,
                         HETEROGENOUS =
                           ifelse(!is.null(heterogenous),
                                  paste(heterogenous, collapse = ", "), NA),
