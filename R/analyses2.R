@@ -175,7 +175,7 @@ analyses2 <- function(dv,
   list_out <-
     list(estimates = out,
          stat = c(
-           r.squared = ifelse(!is.null(estout$r2), estout$r2, NA),
+           r.squared = ifelse(!is.null(estout$r2), fround(estout$r2, digits = round_digits), NA),
            #   ifelse(test = (model == "lm"),
            #          yes = fround(summary(fit)$r2adj, digits = 3),
            #          no = fround(r2_log_prob, digits = 3)),
