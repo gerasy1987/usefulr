@@ -11,7 +11,8 @@
 #' @param cluster Covariate for clustered robust standard errors as defined by \code{multiwayvcov::cluster.vcov} function. Currently only one clustering variable option supported specified as character vector.
 #' @param robust Logical. Whether to report heteroskedastic robust standard errors. Implemented only for linear models for now.
 #' @param data Data frame which contains all the relevant variables.
-#' @param estimate Function that takes all arguments above, \code{fit_formula} and \code{frame_df} as arguments and returns a tibble with the following columns: "term" (required), "estimate" (required), "std.error" (optional), "p.value" (required).
+#' @param estimator Function that takes all arguments above, \code{fit_formula} and \code{frame_df} as arguments and returns a tibble with the following columns: "term" (required), "estimate" (required), "std.error" (optional), "p.value" (required).
+#' @param estimator_name Character string giving name of the estimator used
 #' @param treat_only Logical vector of length 1, specifying whether only \code{treat} estimates should be reported. Defaults to \code{FALSE}.
 #' @param status Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.
 #' @param stars Logical. If \code{FALSE} no stars are passed to printout.
@@ -41,7 +42,8 @@ analyses2 <- function(dv,
                      robust = is.null(cluster),
                      data,
                      subset = NULL,
-                     estimate,
+                     estimator,
+                     estimator_name,
                      treat_only = FALSE,
                      status = NULL,
                      stars = FALSE,
@@ -104,40 +106,40 @@ analyses2 <- function(dv,
   col_names <- c("term", "estimate", "std.error", "p.value")
 
   estout <-
-    estimate(dv = dv,
-             treat = treat,
-             covs = covs,
-             heterogenous = heterogenous,
-             FE = FE,
-             IPW = IPW,
-             IV_list = IV_list,
-             cluster = cluster,
-             robust = robust,
-             data = data,
-             subset = subset,
-             fit_formula = fit_formula,
-             frame_df = frame_df,
-             col_names = col_names,
-             ...)
+    estimator(dv = dv,
+              treat = treat,
+              covs = covs,
+              heterogenous = heterogenous,
+              FE = FE,
+              IPW = IPW,
+              IV_list = IV_list,
+              cluster = cluster,
+              robust = robust,
+              data = data,
+              subset = subset,
+              fit_formula = fit_formula,
+              frame_df = frame_df,
+              col_names = col_names,
+              ...)
 
   # check consistency of estout format
-  missing_col_names <- setdiff(col_names, names(estout))
+  missing_col_names <- setdiff(col_names, names(estout$estimates))
 
   if (length(missing_col_names) != 0) {
     if (missing_col_names != "std.error")
       stop("estimate function has to return tibble with 'term', 'estimate' and 'p.value' columns.")
 
-    if (missing_col_names == "std.error") estout$std.error <- NA
+    if (missing_col_names == "std.error") estout$estimates$std.error <- NA
   }
 
-  # cleanup estout
-  estout <- estout[!grepl(pattern = "Intercept", x = estout$term, fixed = TRUE),]
-  if (treat_only) estout <- estout[grepl(pattern = paste(paste0(treat), collapse = "|"), x = estout$term),]
+  # cleanup estout$estimates
+  estout$estimates <- estout$estimates[!grepl(pattern = "Intercept", x = estout$estimates$term, fixed = TRUE),]
+  if (treat_only) estout$estimates <- estout$estimates[grepl(pattern = paste(paste0(treat), collapse = "|"), x = estout$estimates$term),]
 
   # add stars and printout column
   if (stars) {
     out <-
-      dplyr::mutate(estout,
+      dplyr::mutate(estout$estimates,
                     printout =
                       ifelse(is.nan(estimate), "-- [--]",
                              ifelse(is.na(std.error),
@@ -152,7 +154,7 @@ analyses2 <- function(dv,
                     p.value = round(p.value, digits = round_digits))
   } else if (!stars) {
     out <-
-      dplyr::mutate(estout,
+      dplyr::mutate(estout$estimates,
                     printout =
                       ifelse(is.nan(estimate), "-- [--]",
                              ifelse(is.na(std.error),
@@ -173,12 +175,12 @@ analyses2 <- function(dv,
   list_out <-
     list(estimates = out,
          stat = c(
-           r.squared = NA,
+           r.squared = ifelse(!is.null(estout$r2), estout$r2, NA),
            #   ifelse(test = (model == "lm"),
            #          yes = fround(summary(fit)$r2adj, digits = 3),
            #          no = fround(r2_log_prob, digits = 3)),
            n_obs = fround(nrow(frame_df), digits = 0)),
-         model_spec = c(MODEL = "ols",
+         model_spec = c(MODEL = estimator_name,
                         HETEROGENOUS =
                           ifelse(!is.null(heterogenous),
                                  paste(heterogenous, collapse = ", "), NA),

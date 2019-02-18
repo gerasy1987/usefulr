@@ -6,8 +6,8 @@
 \usage{
 analyses2(dv, treat, covs = NULL, heterogenous = NULL, FE = NULL,
   IPW = NULL, IV_list = NULL, cluster = NULL,
-  robust = is.null(cluster), data, subset = NULL, estimate,
-  treat_only = FALSE, status = NULL, stars = FALSE,
+  robust = is.null(cluster), data, subset = NULL, estimator,
+  estimator_name, treat_only = FALSE, status = NULL, stars = FALSE,
   round_digits = 3, return_df = FALSE, ...)
 }
 \arguments{
@@ -33,7 +33,9 @@ analyses2(dv, treat, covs = NULL, heterogenous = NULL, FE = NULL,
 
 \item{subset}{character string specifing logical expression for subsetting.}
 
-\item{estimate}{Function that takes all arguments above, \code{fit_formula} and \code{frame_df} as arguments and returns a tibble with the following columns: "term" (required), "estimate" (required), "std.error" (optional), "p.value" (required).}
+\item{estimator}{Function that takes all arguments above, \code{fit_formula} and \code{frame_df} as arguments and returns a tibble with the following columns: "term" (required), "estimate" (required), "std.error" (optional), "p.value" (required).}
+
+\item{estimator_name}{Character string giving name of the estimator used}
 
 \item{treat_only}{Logical vector of length 1, specifying whether only \code{treat} estimates should be reported. Defaults to \code{FALSE}.}
 
