@@ -218,7 +218,7 @@ table_fun <- function(.table_list,
     }
 
     return(structure(.list_out,
-                     class = c("table_list", "list"),
+                     class = c("table_list", "knitr_kable"),
                      format = .type))
 
   }
