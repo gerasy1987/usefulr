@@ -118,6 +118,7 @@ analyses2 <- function(dv,
               data = data,
               subset = subset,
               fit_formula = fit_formula,
+              main_formula = main_formula,
               frame_df = frame_df,
               col_names = col_names,
               ...)
