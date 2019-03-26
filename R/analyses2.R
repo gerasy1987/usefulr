@@ -32,24 +32,24 @@
 
 
 analyses2 <- function(dv,
-                     treat,
-                     covs = NULL,
-                     heterogenous = NULL,
-                     FE = NULL,
-                     IPW = NULL,
-                     IV_list = NULL,
-                     cluster = NULL,
-                     robust = is.null(cluster),
-                     data,
-                     subset = NULL,
-                     estimator,
-                     estimator_name,
-                     treat_only = FALSE,
-                     status = NULL,
-                     stars = FALSE,
-                     round_digits = 3,
-                     return_df = FALSE,
-                     ...) {
+                      treat,
+                      covs = NULL,
+                      heterogenous = NULL,
+                      FE = NULL,
+                      IPW = NULL,
+                      IV_list = NULL,
+                      cluster = NULL,
+                      robust = is.null(cluster),
+                      data,
+                      subset = NULL,
+                      estimator,
+                      estimator_name,
+                      treat_only = FALSE,
+                      status = NULL,
+                      stars = FALSE,
+                      round_digits = 3,
+                      return_df = FALSE,
+                      ...) {
 
   # required packages
   requireNamespace("plyr", quietly = TRUE)
@@ -62,16 +62,19 @@ analyses2 <- function(dv,
                                                     heterogenous, IV_list$dv, IV_list$instr)),
                                            collapse = " + ")))
   if (is.null(heterogenous)) {
-    main_formula <- paste(c(treat, covs), collapse = " + ")
+    main_formula <- paste(setdiff(c("1", treat, covs), IV_list$dv), collapse = " + ")
   } else {
-    main_formula <- paste(c(treat, paste0(treat, ":", heterogenous),
-                            heterogenous, covs), collapse = " + ")
+    main_formula <-
+      paste(
+        setdiff(c("1", treat, paste0(treat, ":", heterogenous), heterogenous, covs),
+                IV_list$dv),
+        collapse = " + ")
   }
   main_formula    <- paste(dv, "~", main_formula)
-  main_formula_FE <-
-    ifelse(!is.null(FE),
-           paste0(main_formula, paste0(paste0(" + factor(", FE, ")"), collapse = "")),
-           main_formula)
+  # main_formula_FE <-
+  #   ifelse(!is.null(FE),
+  #          paste0(main_formula, paste0(paste0(" + factor(", FE, ")"), collapse = "")),
+  #          main_formula)
   FE_formula      <- ifelse(is.null(FE), 0, paste(FE, collapse = "+"))
   if (!is.null(IV_list)) {
     IV_formula <- paste("(",
@@ -195,7 +198,8 @@ analyses2 <- function(dv,
                                        1, "yes", "no"), S = ifelse(status[2] == 1, "yes", "no"),
                           P = ifelse(status[3] == 1, "yes", "no")),
          internals = list(data = if (return_df) frame_df else NULL,
-                          estfun_formula = main_formula_FE)
+                          estfun_formula = paste(main_formula, "|",
+                                                 FE_formula, "|", IV_formula, "|", cluster_formula))
          )
 
 
