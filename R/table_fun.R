@@ -155,7 +155,7 @@ table_fun <- function(.table_list,
       base::merge(dtf1, dtf2, by = "term", all = T, suffixes = c(1:10),
                   sort = F)
     }, x = lapply(X = .table_list["estimates", ], FUN = function(x) x[,c("term", "printout")]))))
-    .est_tab <- .est_tab[, -1]
+    .est_tab <- .est_tab[, -1,drop=FALSE]
     .stat_tab <- unname(base::Reduce(f = function(x, y)
       cbind(x,y), x = lapply(X = .table_list["stat", ], FUN = function(x) x[c(2,1)])))
     .spec_tab <- unname(base::Reduce(f = function(x, y)
