@@ -5,6 +5,7 @@
 #' @param .col_names Names of models in list of analyses() outputs.
 #' @param .type "html","markdown" or "latex" as specified in knitr::kable function.
 #' @param .title Character string specifying the name of the table.
+#' @param .label Character string specifying the label used to refer to table.
 #' @param .print_status Logical. Whether to print status of the model.
 #' @param .pad Integer number for output table padding.
 #' @param .col_print Number of columns to split by. Defaults to 5.
@@ -40,6 +41,7 @@ table_fun <- function(.table_list,
                       .row_names,
                       .col_names,
                       .title,
+                      .label = NULL,
                       .print_status = FALSE,
                       .type = getOption("usefulr.type", "markdown"),
                       .pad = getOption("usefulr.html_pad", 0),
@@ -189,6 +191,7 @@ table_fun <- function(.table_list,
     .list_out[[1]] <-
       knitr::kable(x = .out_tab, format = .type,
                    caption = .title,
+                   label = .label,
                    align = rep("c", ncol(.out_tab)),
                    escape = FALSE,
                    booktabs = TRUE,
@@ -213,6 +216,7 @@ table_fun <- function(.table_list,
       .list_out[[i]] <-
           knitr::kable(x = .temp, format = .type,
                        caption = ifelse(i == 1, .title, "Table continued"),
+                       label = if (i == 1) .label,
                        align = c("l", rep("c", (ncol(.temp) - 1))), escape = TRUE,
                        padding = .pad)
     }

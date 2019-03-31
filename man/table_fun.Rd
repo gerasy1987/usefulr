@@ -4,7 +4,7 @@
 \alias{table_fun}
 \title{Generate markdown or LaTeX table from list of analyses() function outputs.}
 \usage{
-table_fun(.table_list, .row_names, .col_names, .title,
+table_fun(.table_list, .row_names, .col_names, .title, .label = NULL,
   .print_status = FALSE, .type = getOption("usefulr.type", "markdown"),
   .pad = getOption("usefulr.html_pad", 0),
   .col_print = getOption("usefulr.html_col", 5), .add_rows = NULL,
@@ -18,6 +18,8 @@ table_fun(.table_list, .row_names, .col_names, .title,
 \item{.col_names}{Names of models in list of analyses() outputs.}
 
 \item{.title}{Character string specifying the name of the table.}
+
+\item{.label}{Character string specifying the label used to refer to table.}
 
 \item{.print_status}{Logical. Whether to print status of the model.}
 
