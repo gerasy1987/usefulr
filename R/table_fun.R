@@ -164,7 +164,7 @@ table_fun <- function(.table_list,
     #     y), x = lapply(X = .table_list["model_status", ],
     #     FUN = function(x) x[1:3])))
     if (.type == "latex")
-      .est_tab <- apply(.est_tab, MARGIN = 1,
+      .est_tab <- apply(.est_tab, MARGIN = 2,
                         FUN = function(x) kableExtra::linebreak(gsub(x, pattern = " \\[", replacement = "\\\n["),
                                                                 align = "c", linebreaker = "\n"))
     .out_tab <- unname(rbind(.est_tab, .stat_tab, .spec_tab))
