@@ -35,6 +35,7 @@
 #'           }
 #'
 #' @import knitr xtable
+#' @importFrom  kableExtra linebreak
 #' @export
 
 table_fun <- function(.table_list,
@@ -113,6 +114,8 @@ table_fun <- function(.table_list,
     .stat_tab <- unname(.table_list$stat[c(2,1)])
     .spec_tab <- unname(.table_list$model_spec[c(1,3:5)])
     # .status_tab <- unname(.table_list$model_status[1:3])
+    if (.type == "latex")
+      .est_tab <- kableExtra::linebreak(.est_tab, align = c, linebreaker = " ")
     .out_tab <- as.matrix(c(.est_tab, .stat_tab, .spec_tab))
   } else {
     if (length(.col_names) != dim(.table_list)[2])
@@ -159,6 +162,8 @@ table_fun <- function(.table_list,
     # .status_tab <- unname(base::Reduce(f = function(x, y) cbind(x,
     #     y), x = lapply(X = .table_list["model_status", ],
     #     FUN = function(x) x[1:3])))
+    if (.type == "latex")
+      .est_tab <- apply(.est_tab, MARGIN = 1, FUN = function(x) kableExtra::linebreak(x, align = c, linebreaker = " "))
     .out_tab <- unname(rbind(.est_tab, .stat_tab, .spec_tab))
   }
 
