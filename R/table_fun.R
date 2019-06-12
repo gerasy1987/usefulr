@@ -187,7 +187,7 @@ table_fun <- function(.table_list,
   .out_tab <- ifelse(is.na(.out_tab), "", .out_tab)
 
   if (!is.null(.add_rows)) {
-    if (ncol(.out_tab) != ncol(.add_rows)) stop(".add_cols has wrong number of columns")
+    if (ncol(.out_tab) != ncol(.add_rows)) stop(".add_rows has wrong number of columns")
   }
 
   .out_tab <- rbind(.out_tab, unname(.add_rows))
