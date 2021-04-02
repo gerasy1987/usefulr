@@ -4,12 +4,29 @@
 \alias{analyses}
 \title{Analysis Function for Replications.}
 \usage{
-analyses(DV, treat, data, model = "lm", covs = NULL,
-  heterogenous = NULL, subset = NULL, FE = NULL, cluster = NULL,
-  IV_list = NULL, robust = is.null(cluster), ri = NULL, IPW = NULL,
-  treat_only = FALSE, margin_at = NULL, status = NULL,
-  stars = FALSE, round_digits = 3, return_df = FALSE, seed = 12345,
-  cores = 4)
+analyses(
+  DV,
+  treat,
+  data,
+  model = "lm",
+  covs = NULL,
+  heterogenous = NULL,
+  subset = NULL,
+  FE = NULL,
+  cluster = NULL,
+  IV_list = NULL,
+  robust = is.null(cluster),
+  ri = NULL,
+  IPW = NULL,
+  treat_only = FALSE,
+  margin_at = NULL,
+  status = NULL,
+  stars = FALSE,
+  round_digits = 3,
+  return_df = FALSE,
+  seed = 12345,
+  cores = 4
+)
 }
 \arguments{
 \item{DV}{Dependent variable specified as character.}

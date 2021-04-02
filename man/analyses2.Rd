@@ -4,11 +4,27 @@
 \alias{analyses2}
 \title{Estimation Function}
 \usage{
-analyses2(dv, treat, covs = NULL, heterogenous = NULL, FE = NULL,
-  IPW = NULL, IV_list = NULL, cluster = NULL,
-  robust = is.null(cluster), data, subset = NULL, estimator,
-  estimator_name, treat_only = FALSE, status = NULL, stars = FALSE,
-  round_digits = 3, return_df = FALSE, ...)
+analyses2(
+  dv,
+  treat,
+  covs = NULL,
+  heterogenous = NULL,
+  FE = NULL,
+  IPW = NULL,
+  IV_list = NULL,
+  cluster = NULL,
+  robust = is.null(cluster),
+  data,
+  subset = NULL,
+  estimator,
+  estimator_name,
+  treat_only = FALSE,
+  status = NULL,
+  stars = FALSE,
+  round_digits = 3,
+  return_df = FALSE,
+  ...
+)
 }
 \arguments{
 \item{dv}{Dependent variable specified as character.}
