@@ -5,7 +5,7 @@ Authors@R: person("Georgiy", "Syunyaev", email = "gs2716@columbia.edu", role = c
 Description: The Package provides number of functions for replication of studies. The functions are made to run OLS, Probit, Logit and Ordinal Logit and Probit models and produce markdown, html or LaTeX output tables.
 Depends:
     R (>= 3.3.0),
-    dplyr,
+    tidyverse,
     broom,
     knitr,
     xtable
@@ -13,10 +13,12 @@ Imports:
     mosaic,
     stats,
     utils,
-    plyr,
     multiwayvcov,
     lmtest,
     lfe,
+    RcppAlgos,
+    parallel,
+    doParallel,
     MASS,
     erer,
     margins
