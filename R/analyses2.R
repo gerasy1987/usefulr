@@ -22,12 +22,9 @@
 #' @return List of three objects. \code{estimates} is estimates from the model and corresponding standard errors. \code{stat} is vector of adjusted R squared and number of observations. \code{model_spec} is logical vector of characteristics of the model.
 #' @examples
 #'
-#' @import dplyr broom
-#' @importFrom lfe felm
-#' @importFrom multiwayvcov cluster.vcov
-#' @importFrom lmtest coeftest
-#' @importFrom MASS polr
-#' @importFrom margins margins
+#' @import dplyr
+#' @import broom
+#' @importFrom purrr when
 #' @export
 
 
@@ -51,12 +48,6 @@ analyses2 <- function(dv,
                       return_df = FALSE,
                       ...) {
 
-  # required packages
-  requireNamespace("plyr", quietly = TRUE)
-  requireNamespace("dplyr", quietly = TRUE)
-  requireNamespace("broom", quietly = TRUE)
-  requireNamespace("lmtest", quietly = TRUE)
-
   frame_formula <-
     stats::as.formula(paste(dv, "~", paste(unique(c(treat, covs, FE, cluster, IPW,
                                                     heterogenous, IV_list$dv, IV_list$instr)),
@@ -70,12 +61,14 @@ analyses2 <- function(dv,
                 IV_list$dv),
         collapse = " + ")
   }
-  main_formula    <- paste(dv, "~", main_formula)
+  main_formula <- paste(dv, "~", main_formula)
   # main_formula_FE <-
   #   ifelse(!is.null(FE),
   #          paste0(main_formula, paste0(paste0(" + factor(", FE, ")"), collapse = "")),
   #          main_formula)
-  FE_formula      <- ifelse(is.null(FE), 0, paste(FE, collapse = "+"))
+
+  FE_formula <- dplyr::if_else(is.null(FE), "0", paste(FE, collapse = "+"))
+
   if (!is.null(IV_list)) {
     IV_formula <- paste("(",
                         paste0(IV_list$dv, collapse = "|"), "~",
@@ -84,25 +77,38 @@ analyses2 <- function(dv,
                                       no = IV_list$instr), collapse = "+"),
                         ")")
   } else {
-    IV_formula <- 0
+    IV_formula <- "0"
   }
-  cluster_formula <- ifelse(is.null(cluster), 0, paste(cluster,
-                                                       collapse = "+"))
-  fit_formula <- stats::as.formula(paste(main_formula, "|",
-                                         FE_formula, "|", IV_formula, "|", cluster_formula))
 
-  frame_df <- eval(parse(text = paste0("dplyr::filter(.data = data, ", subset, ")")))
-  frame_df <- eval(parse(text = paste0("dplyr::filter(.data = frame_df, ",
-                                       paste(
-                                         paste0("!is.na(",
-                                                unique(c(treat, dv, FE, cluster, IPW, heterogenous,
-                                                         IV_list$dv, IV_list$instr)), ")"),
-                                         collapse = " & "), ")" )))
+  cluster_formula <- dplyr::if_else(is.null(cluster), "0", paste(cluster, collapse = "+"))
+
+  fit_formula <-
+    stats::as.formula(paste(main_formula, "|",
+                            FE_formula, "|",
+                            IV_formula, "|",
+                            cluster_formula))
+
+  frame_df <-
+    purrr::when(subset,
+                is.character(.) ~ dplyr::filter(data, eval(parse(text =  subset))),
+                ~ data)
+  frame_df <-
+    dplyr::filter(frame_df,
+                  dplyr::if_all(unique(c(treat, dv, FE,
+                                         cluster, IPW, heterogenous,
+                                         IV_list$dv, IV_list$instr)),
+                                ~ !is.na(.)))
+
   frame_df <- stats::model.frame(frame_formula, data = frame_df)
 
-  if (length(FE) > 1) frame_df[, FE] <- (plyr::colwise(as.factor))(frame_df[, FE])
-  if (length(FE) == 1) frame_df[, FE] <- as.factor(frame_df[, FE])
+  frame_df <-
+    dplyr::mutate(
+      frame_df,
+      across(all_of(FE), ~ as.factor(.))
+    )
 
+  # if (length(FE) > 1) frame_df[, FE] <- (plyr::colwise(as.factor))(frame_df[, FE])
+  # if (length(FE) == 1) frame_df[, FE] <- as.factor(frame_df[, FE])
 
   # ESTIMATION
 
@@ -122,6 +128,9 @@ analyses2 <- function(dv,
               subset = subset,
               fit_formula = fit_formula,
               main_formula = main_formula,
+              FE_formula = FE_formula,
+              IV_formula = IV_formula,
+              cluster_formula = cluster_formula,
               frame_df = frame_df,
               col_names = col_names,
               ...)
@@ -184,23 +193,31 @@ analyses2 <- function(dv,
            #          yes = fround(summary(fit)$r2adj, digits = 3),
            #          no = fround(r2_log_prob, digits = 3)),
            n_obs = fround(nrow(frame_df), digits = 0)),
-         model_spec = c(MODEL = estimator_name,
-                        HETEROGENOUS =
-                          ifelse(!is.null(heterogenous),
-                                 paste(heterogenous, collapse = ", "), NA),
-                        FE = ifelse(!is.null(FE),
-                                    paste(FE, collapse = ", "), "no"),
-                        commaCLUSTER = ifelse(!is.null(cluster),
-                                              paste(cluster, collapse = ", "), "no"),
-                        IPW = ifelse(!is.null(IPW),
-                                     paste(IPW, collapse = ", "), "no")),
-         model_status = c(R = ifelse(status[1] ==
-                                       1, "yes", "no"), S = ifelse(status[2] == 1, "yes", "no"),
-                          P = ifelse(status[3] == 1, "yes", "no")),
-         internals = list(data = if (return_df) frame_df else NULL,
-                          estfun_formula = paste(main_formula, "|",
-                                                 FE_formula, "|", IV_formula, "|", cluster_formula))
+         model_spec = c(
+           MODEL = estimator_name,
+           HETEROGENOUS =
+             dplyr::if_else(!is.null(heterogenous), paste(heterogenous, collapse = ", "), NA),
+           FE =
+             dplyr::if_else(!is.null(FE), paste(FE, collapse = ", "), "no"),
+           commaCLUSTER =
+             dplyr::if_else(!is.null(cluster), paste(cluster, collapse = ", "), "no"),
+           IPW =
+             dplyr::if_else(!is.null(IPW), paste(IPW, collapse = ", "), "no")),
+         model_status = c(
+           R = ifelse(status[1] == 1, "yes", "no"),
+           S = ifelse(status[2] == 1, "yes", "no"),
+           P = ifelse(status[3] == 1, "yes", "no")),
+         internals = list(
+           data = purrr::when(return_df, . ~ frame_df, ~ NULL),
+           fit = estout$fit,
+           estfun_formula =
+             paste(main_formula, "|", FE_formula, "|", IV_formula, "|", cluster_formula),
+           main_formula = main_formula,
+           FE_formula = FE_formula,
+           IV_formula = IV_formula,
+           cluster_formula = cluster_formula
          )
+    )
 
 
   return(structure(list_out,
