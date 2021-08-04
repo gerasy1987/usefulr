@@ -196,7 +196,7 @@ analyses2 <- function(dv,
          model_spec = c(
            MODEL = estimator_name,
            HETEROGENOUS =
-             dplyr::if_else(!is.null(heterogenous), paste(heterogenous, collapse = ", "), NA),
+             dplyr::if_else(!is.null(heterogenous), paste(heterogenous, collapse = ", "), NA_character_),
            FE =
              dplyr::if_else(!is.null(FE), paste(FE, collapse = ", "), "no"),
            commaCLUSTER =
