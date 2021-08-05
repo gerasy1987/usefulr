@@ -180,7 +180,11 @@ table_fun <- function(.table_list,
     )
   }
 
-  .out_tab <- unname(rbind(.est_tab, .stat_tab, .spec_tab))
+  if (!is.null(.add_rows)) {
+    if (ncol(.out_tab) != ncol(.add_rows)) stop(".add_rows has wrong number of columns")
+  }
+
+  .out_tab <- unname(rbind(.est_tab, .stat_tab, unname(.add_rows), .spec_tab))
 
   # }
 
@@ -200,16 +204,14 @@ table_fun <- function(.table_list,
 
   .out_tab <- ifelse(is.na(.out_tab), "", .out_tab)
 
-  if (!is.null(.add_rows)) {
-    if (ncol(.out_tab) != ncol(.add_rows)) stop(".add_rows has wrong number of columns")
-  }
+  # .out_tab <- rbind(.out_tab, unname(.add_rows))
 
-  .out_tab <- rbind(.out_tab, unname(.add_rows))
+  .row_names <- c(.row_names, rownames(.add_rows), "Model", "FE", "Clustered SE", "IPW")
 
   .list_out <- list()
 
   if (.type == "latex") {
-    rownames(.out_tab) <- c(.row_names, "Model" , "FE", "Clustered SE", "IPW", rownames(.add_rows))
+    rownames(.out_tab) <- .row_names
     .list_out[[1]] <-
       knitr::kable(x = .out_tab, format = .type,
                    caption = .title,
@@ -221,7 +223,7 @@ table_fun <- function(.table_list,
   } else {
     .split_tab <- base::split(1:dim(.out_tab)[2], base::ceiling(1:dim(.out_tab)[2]/.col_print))
     for (i in 1:length(.split_tab)) {
-      .temp <- cbind(c(.row_names, "Model",  "FE", "Clustered SE", "IPW", rownames(.add_rows)),
+      .temp <- cbind(.row_names,
                      .out_tab[, .split_tab[[i]]])
       colnames(.temp) <- c("", .col_names[.split_tab[[i]]])
       .list_out[[i]] <-
