@@ -160,13 +160,13 @@ table_fun <- function(.table_list,
   }, x = lapply(X = .table_list["estimates", ], FUN = function(x) x[,c("term", "printout")]))))
   .est_tab <- .est_tab[, -1, drop = FALSE]
   .stat_tab <- unname(
-    base::Reduce(f = function(x, y) cbind(x,y),
-                 x = lapply(X = .table_list["stat", ],
-                            FUN = function(x) x[c(2,1)])))
+    do.call("cbind",
+            lapply(X = .table_list["stat", ],
+                   FUN = function(x) x[c(2,1)])))
   .spec_tab <- unname(
-    base::Reduce(f = function(x, y) cbind(x, y),
-                 x = lapply(X = .table_list["model_spec", ],
-                            FUN = function(x) x[c(1, 3:5)])))
+    do.call("cbind",
+            lapply(X = .table_list["model_spec", ],
+                   FUN = function(x) x[c(1, 3:5)])))
   # .status_tab <- unname(base::Reduce(f = function(x, y) cbind(x,
   #     y), x = lapply(X = .table_list["model_status", ],
   #     FUN = function(x) x[1:3])))
@@ -179,6 +179,7 @@ table_fun <- function(.table_list,
                               align = "c", linebreaker = "\n")}
     )
   }
+
   .out_tab <- unname(rbind(.est_tab, .stat_tab, .spec_tab))
 
   # }
