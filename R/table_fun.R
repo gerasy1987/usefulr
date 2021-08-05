@@ -34,7 +34,7 @@
 #'           .title = "Replication of Table 3")
 #'           }
 #'
-#' @import knitr xtable
+#' @import knitr
 #' @importFrom  kableExtra linebreak
 #' @export
 
@@ -65,9 +65,6 @@ table_fun <- function(.table_list,
                       # .latex_placement = getOption("usefulr.latex_placement", "H")
                       ) {
 
-  requireNamespace("knitr", quietly = TRUE)
-  requireNamespace("xtable", quietly = TRUE)
-
   .type <- match.arg(arg = .type, choices = c("markdown", "html", "latex"))
   .pad <- suppressWarnings(as.integer(.pad))
   .col_print <- suppressWarnings(as.integer(.col_print))
@@ -82,93 +79,109 @@ table_fun <- function(.table_list,
   #   stop("Sanitize argument should be a function")
 
   if (is.null(dim(.table_list))) {
-    if (length(.col_names) > 1)
-      stop("Mismatch in length of col_names and number of columns in table_list")
 
-    if (.add_stars) {
-      .est_tab <-
-        dplyr::mutate(.table_list$estimates,
-                      printout =
-                        ifelse(is.nan(estimate), "-- [--]",
-                               ifelse(is.na(std.error),
-                                      paste0(fround(estimate, digits = .round_digits),
-                                             add_stars(p.value, type = .type),
-                                             " [", fround(p.value, digits = .round_digits), "]"),
-                                      paste0(fround(estimate, digits = .round_digits),
-                                             add_stars(p.value, type = .type),
-                                             " [", fround(std.error, digits = .round_digits), "]"))))
-    } else if (!.add_stars) {
-      .est_tab <-
-        dplyr::mutate(.table_list$estimates,
-                      printout =
-                        ifelse(is.nan(estimate), "-- [--]",
-                               ifelse(is.na(std.error),
-                                      paste0(fround(estimate, digits = .round_digits),
-                                             " [", fround(p.value, digits = .round_digits), "]"),
-                                      paste0(fround(estimate, digits = .round_digits),
-                                             " [", fround(std.error, digits = .round_digits), "]"))))
-    }
+    .table_list <-
+      matrix(.table_list,
+             nrow = length(.table_list),
+             dimnames = list(names(.table_list), NULL))
 
-    .est_tab <- .est_tab[, "printout"]
+    # if (length(.col_names) > 1)
+    #   stop("Mismatch in length of col_names and number of columns in table_list")
+    #
+    # if (.add_stars) {
+    #   .est_tab <-
+    #     dplyr::mutate(.table_list$estimates,
+    #                   printout =
+    #                     ifelse(is.nan(estimate), "-- [--]",
+    #                            ifelse(is.na(std.error),
+    #                                   paste0(fround(estimate, digits = .round_digits),
+    #                                          add_stars(p.value, type = .type),
+    #                                          " [", fround(p.value, digits = .round_digits), "]"),
+    #                                   paste0(fround(estimate, digits = .round_digits),
+    #                                          add_stars(p.value, type = .type),
+    #                                          " [", fround(std.error, digits = .round_digits), "]"))))
+    # } else if (!.add_stars) {
+    #   .est_tab <-
+    #     dplyr::mutate(.table_list$estimates,
+    #                   printout =
+    #                     ifelse(is.nan(estimate), "-- [--]",
+    #                            ifelse(is.na(std.error),
+    #                                   paste0(fround(estimate, digits = .round_digits),
+    #                                          " [", fround(p.value, digits = .round_digits), "]"),
+    #                                   paste0(fround(estimate, digits = .round_digits),
+    #                                          " [", fround(std.error, digits = .round_digits), "]"))))
+    # }
+    #
+    # .est_tab <- .est_tab[, "printout"]
+    #
+    # .stat_tab <- unname(.table_list$stat[c(2,1)])
+    # .spec_tab <- unname(.table_list$model_spec[c(1,3:5)])
+    # # .status_tab <- unname(.table_list$model_status[1:3])
+    # if (.type == "latex")
+    #   .est_tab <- kableExtra::linebreak(gsub(.est_tab, pattern = " \\[", replacement = "\\\n["),
+    #                                     align = "c", linebreaker = "\n")
+    # .out_tab <- as.matrix(c(.est_tab, .stat_tab, .spec_tab))
+  } # else {
+  if (length(.col_names) != dim(.table_list)[2])
+    stop("Mismatch in length of col_names and number of columns in table_list")
 
-    .stat_tab <- unname(.table_list$stat[c(2,1)])
-    .spec_tab <- unname(.table_list$model_spec[c(1,3:5)])
-    # .status_tab <- unname(.table_list$model_status[1:3])
-    if (.type == "latex")
-      .est_tab <- kableExtra::linebreak(gsub(.est_tab, pattern = " \\[", replacement = "\\\n["),
-                                        align = "c", linebreaker = "\n")
-    .out_tab <- as.matrix(c(.est_tab, .stat_tab, .spec_tab))
-  } else {
-    if (length(.col_names) != dim(.table_list)[2])
-      stop("Mismatch in length of col_names and number of columns in table_list")
+  .table_list["estimates", ] <-
+    lapply(.table_list["estimates", ], function(x) {
+      if (.add_stars) {
+        x <-
+          dplyr::mutate(x,
+                        printout =
+                          ifelse(is.nan(estimate), "-- [--]",
+                                 ifelse(is.na(std.error),
+                                        paste0(fround(estimate, digits = .round_digits),
+                                               add_stars(p.value, type = .type),
+                                               " [", fround(p.value, digits = .round_digits), "]"),
+                                        paste0(fround(estimate, digits = .round_digits),
+                                               add_stars(p.value, type = .type),
+                                               " [", fround(std.error, digits = .round_digits), "]"))))
+      } else if (!.add_stars) {
+        x <-
+          dplyr::mutate(x,
+                        printout =
+                          ifelse(is.nan(estimate), "-- [--]",
+                                 ifelse(is.na(std.error),
+                                        paste0(fround(estimate, digits = .round_digits),
+                                               " [", fround(p.value, digits = .round_digits), "]"),
+                                        paste0(fround(estimate, digits = .round_digits),
+                                               " [", fround(std.error, digits = .round_digits), "]"))))
+      }
+      return(x)
+    })
 
-    .table_list["estimates", ] <-
-      lapply(.table_list["estimates", ], function(x) {
-        if (.add_stars) {
-          x <-
-            dplyr::mutate(x,
-                          printout =
-                            ifelse(is.nan(estimate), "-- [--]",
-                                   ifelse(is.na(std.error),
-                                          paste0(fround(estimate, digits = .round_digits),
-                                                 add_stars(p.value, type = .type),
-                                                 " [", fround(p.value, digits = .round_digits), "]"),
-                                          paste0(fround(estimate, digits = .round_digits),
-                                                 add_stars(p.value, type = .type),
-                                                 " [", fround(std.error, digits = .round_digits), "]"))))
-        } else if (!.add_stars) {
-          x <-
-            dplyr::mutate(x,
-                          printout =
-                            ifelse(is.nan(estimate), "-- [--]",
-                                   ifelse(is.na(std.error),
-                                          paste0(fround(estimate, digits = .round_digits),
-                                                 " [", fround(p.value, digits = .round_digits), "]"),
-                                          paste0(fround(estimate, digits = .round_digits),
-                                                 " [", fround(std.error, digits = .round_digits), "]"))))
-        }
-        return(x)
-      })
-
-    .est_tab <- as.matrix(suppressWarnings(base::Reduce(f = function(dtf1,
-                                                                     dtf2) {
-      base::merge(dtf1, dtf2, by = "term", all = T, suffixes = c(1:10),
-                  sort = F)
-    }, x = lapply(X = .table_list["estimates", ], FUN = function(x) x[,c("term", "printout")]))))
-    .est_tab <- .est_tab[, -1,drop=FALSE]
-    .stat_tab <- unname(base::Reduce(f = function(x, y)
-      cbind(x,y), x = lapply(X = .table_list["stat", ], FUN = function(x) x[c(2,1)])))
-    .spec_tab <- unname(base::Reduce(f = function(x, y)
-      cbind(x, y), x = lapply(X = .table_list["model_spec", ], FUN = function(x) x[c(1, 3:5)])))
-    # .status_tab <- unname(base::Reduce(f = function(x, y) cbind(x,
-    #     y), x = lapply(X = .table_list["model_status", ],
-    #     FUN = function(x) x[1:3])))
-    if (.type == "latex")
-      .est_tab <- apply(.est_tab, MARGIN = 2,
-                        FUN = function(x) kableExtra::linebreak(gsub(x, pattern = " \\[", replacement = "\\\n["),
-                                                                align = "c", linebreaker = "\n"))
-    .out_tab <- unname(rbind(.est_tab, .stat_tab, .spec_tab))
+  .est_tab <- as.matrix(suppressWarnings(base::Reduce(f = function(dtf1,
+                                                                   dtf2) {
+    base::merge(dtf1, dtf2, by = "term", all = T, suffixes = c(1:10),
+                sort = F)
+  }, x = lapply(X = .table_list["estimates", ], FUN = function(x) x[,c("term", "printout")]))))
+  .est_tab <- .est_tab[, -1, drop = FALSE]
+  .stat_tab <- unname(
+    base::Reduce(f = function(x, y) cbind(x,y),
+                 x = lapply(X = .table_list["stat", ],
+                            FUN = function(x) x[c(2,1)])))
+  .spec_tab <- unname(
+    base::Reduce(f = function(x, y) cbind(x, y),
+                 x = lapply(X = .table_list["model_spec", ],
+                            FUN = function(x) x[c(1, 3:5)])))
+  # .status_tab <- unname(base::Reduce(f = function(x, y) cbind(x,
+  #     y), x = lapply(X = .table_list["model_status", ],
+  #     FUN = function(x) x[1:3])))
+  if (.type == "latex") {
+    .est_tab <- apply(
+      X = .est_tab,
+      MARGIN = 2,
+      FUN = function(x) {
+        kableExtra::linebreak(gsub(x, pattern = " \\[", replacement = "\\\n["),
+                              align = "c", linebreaker = "\n")}
+    )
   }
+  .out_tab <- unname(rbind(.est_tab, .stat_tab, .spec_tab))
+
+  # }
 
   if (.type %in% c("markdown", "latex"))
     .col_names <- gsub(pattern = "\\\n", replacement = " ",
@@ -204,17 +217,6 @@ table_fun <- function(.table_list,
                    escape = FALSE,
                    booktabs = TRUE,
                    linesep = "")
-      # xtable::print.xtable(x = xtable::xtable(x = .out_tab,
-      #                                         align = c("X", rep(.latex_colwidth, (ncol(.out_tab)))),
-      #                                         caption = .title), sanitize.text.function = .latex_sanitize,
-      #                      caption.placement = "top", scalebox = .latex_scalebox,
-      #                      size = .latex_size, include.rownames = TRUE, comment = FALSE,
-      #                      booktabs = TRUE, floating = .latex_floating[[1]],
-      #                      floating.environment = .latex_floating[[2]], tabular.environment = "tabularx",
-      #                      width = "\\textwidth", table.placement = .latex_placement,
-      #                      add.to.row = list(pos = list(c(nrow(.out_tab) - 8,
-      #                                                     nrow(.out_tab) - 6, nrow(.out_tab) - 3)),
-      #                                        command = c("\\midrule \n")))
   } else {
     .split_tab <- base::split(1:dim(.out_tab)[2], base::ceiling(1:dim(.out_tab)[2]/.col_print))
     for (i in 1:length(.split_tab)) {
