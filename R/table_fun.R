@@ -192,15 +192,15 @@ table_fun <- function(.table_list,
   }
 
   if (!is.null(.add_rows)) {
-    if (ncol(.out_tab) != ncol(.add_rows)) stop(".add_rows has wrong number of columns")
+    if (ncol(.est_tab) != ncol(.add_rows)) stop(".add_rows has wrong number of columns")
   }
 
   if (!is.null(.group_means)) {
-    if (ncol(.out_tab) != ncol(.group_means)) stop(".group_means has wrong number of columns")
+    if (ncol(.est_tab) != ncol(.group_means)) stop(".group_means has wrong number of columns")
   }
 
   if (!is.null(.hypotheses)) {
-    if (ncol(.out_tab) != ncol(.hypotheses)) stop(".hypotheses has wrong number of columns")
+    if (ncol(.est_tab) != ncol(.hypotheses)) stop(".hypotheses has wrong number of columns")
   }
 
   .out_tab <- unname(rbind(
