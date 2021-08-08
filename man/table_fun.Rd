@@ -13,9 +13,12 @@ table_fun(
   .print_status = FALSE,
   .type = getOption("usefulr.type", "markdown"),
   .pad = getOption("usefulr.html_pad", 0),
-  .col_print = getOption("usefulr.html_col", 5),
+  .col_print = getOption("usefulr.html_col", 6),
+  .group_means = NULL,
+  .hypotheses = NULL,
   .add_rows = NULL,
   .add_stars = FALSE,
+  .add_modelspec = FALSE,
   .round_digits = 3
 )
 }
@@ -32,15 +35,21 @@ table_fun(
 
 \item{.print_status}{Logical. Whether to print status of the model.}
 
-\item{.type}{"html","markdown" or "latex" as specified in knitr::kable function.}
+\item{.type}{Character string. Either "html","markdown" or "latex" as specified in knitr::kable function.}
 
-\item{.pad}{Integer number for output table padding.}
+\item{.pad}{Integer number for output table padding}
 
-\item{.col_print}{Number of columns to split by. Defaults to 5.}
+\item{.col_print}{Number of columns to split by. Defaults to 6.}
 
-\item{.add_rows}{matrix to add to the main output.}
+\item{.group_means}{Matrix of group means with row names. Number of columns must coincide with the main table output}
+
+\item{.hypotheses}{Matrix of directional hypotheses with row names. Number of columns must coincide with the main table output}
+
+\item{.add_rows}{<atrix with other statistics to add to the main output. Number of columns must coincide with the main table output}
 
 \item{.add_stars}{Logical. Whether to add statistical significance stars}
+
+\item{.add_modelspec}{Logical. Whether to add statistical significance stars}
 
 \item{.round_digits}{Numeric. The rounding of report is done up to 10^{-.round_digits}.
 param .latex_colwidth If .type = "latex", character string specifying column width and alignment. Defaults to ">{\\centering\\arraybackslash\\hsize=.5\\hsize}X".
