@@ -12,7 +12,7 @@
 #' @param .group_means Matrix of group means with row names. Number of columns must coincide with the main table output
 #' @param .hypotheses Matrix of directional hypotheses with row names. Number of columns must coincide with the main table output
 #' @param .add_rows <atrix with other statistics to add to the main output. Number of columns must coincide with the main table output
-#' @param .add_stars Logical. Whether to add statistical significance stars
+#' @param .add_stars Nemed vector of significance levels
 #' @param .add_modelspec Logical. Whether to add statistical significance stars
 #' @param .round_digits Numeric. The rounding of report is done up to 10^{-.round_digits}.
 #' param .latex_colwidth If .type = "latex", character string specifying column width and alignment. Defaults to ">{\\centering\\arraybackslash\\hsize=.5\\hsize}X".
@@ -53,7 +53,7 @@ table_fun <- function(.table_list,
                       .group_means = NULL,
                       .hypotheses = NULL,
                       .add_rows = NULL,
-                      .add_stars = NULL,
+                      .add_stars = c("***" = .01, "**" = .05, "*" = .1, "+" = .15),
                       .add_modelspec = FALSE,
                       .round_digits = 3 #,
                       # .latex_colwidth = getOption("usefulr.latex_colwidth",
