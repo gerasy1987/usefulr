@@ -187,8 +187,8 @@ table_fun <- function(.table_list,
     .est_tab <- tapply(
       X = .est_tab, INDEX = col(.est_tab),
       FUN = function(x) {
-        as.matrix(kableExtra::linebreak(gsub(x, pattern = " \\[", replacement = "\\\n["),
-                              align = "c", linebreaker = "\n"))}
+        kableExtra::linebreak(gsub(x, pattern = " \\[", replacement = "\\\n["),
+                              align = "c", linebreaker = "\n")}
     )
 
 
