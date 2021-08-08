@@ -184,14 +184,15 @@ table_fun <- function(.table_list,
   #     FUN = function(x) x[1:3])))
 
   if (.type == "latex") {
-    .est_tab <- tapply(
-      X = .est_tab, INDEX = col(.est_tab),
-      FUN = function(x) {
-        kableExtra::linebreak(gsub(x, pattern = " \\[", replacement = "\\\n["),
-                              align = "c", linebreaker = "\n")}
-    )
-
-
+    .est_tab <- do.call(
+      "cbind",
+      tapply(
+        X = .est_tab, INDEX = col(.est_tab),
+        FUN = function(x) {
+          kableExtra::linebreak(gsub(x, pattern = " \\[", replacement = "\\\n["),
+                                align = "c", linebreaker = "\n")},
+        simplify = FALSE
+      ))
   }
 
   if (!is.null(.add_rows)) {
