@@ -24,18 +24,6 @@
 #' param .latex_placement If type="latex", character string specifying table floating placement. Defaults to "H".
 #' @return Markdown or LaTeX table of estimated models.
 #' @examples
-#' \dontrun{
-#' table_fun(.table_list = table3,
-#'           .row_names = c("Constant","Info Only","Civics",
-#'                          "Treatment","Private","Public",
-#'                          "High Dosage x Civics","Observations",
-#'                          "Adj. R-squared"),
-#'           .col_names = c("Low Dose", "High Dose\\\nNo Civics",
-#'                          "High Dose\\\nNo Civics", "All\\\nHigh Dose",
-#'                          "All\\\nCommunes"),
-#'           .type = "html",
-#'           .title = "Replication of Table 3")
-#'           }
 #'
 #' @import knitr
 #' @import dplyr

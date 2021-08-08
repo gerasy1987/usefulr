@@ -17,7 +17,7 @@ table_fun(
   .group_means = NULL,
   .hypotheses = NULL,
   .add_rows = NULL,
-  .add_stars = TRUE,
+  .add_stars = c(`***` = 0.01, `**` = 0.05, `*` = 0.1, `+` = 0.15),
   .add_modelspec = FALSE,
   .round_digits = 3
 )
@@ -47,7 +47,7 @@ table_fun(
 
 \item{.add_rows}{<atrix with other statistics to add to the main output. Number of columns must coincide with the main table output}
 
-\item{.add_stars}{Logical. Whether to add statistical significance stars}
+\item{.add_stars}{Nemed vector of significance levels}
 
 \item{.add_modelspec}{Logical. Whether to add statistical significance stars}
 
@@ -67,17 +67,5 @@ Markdown or LaTeX table of estimated models.
 Generate markdown or LaTeX table from list of analyses() function outputs.
 }
 \examples{
-\dontrun{
-table_fun(.table_list = table3,
-          .row_names = c("Constant","Info Only","Civics",
-                         "Treatment","Private","Public",
-                         "High Dosage x Civics","Observations",
-                         "Adj. R-squared"),
-          .col_names = c("Low Dose", "High Dose\\\\\nNo Civics",
-                         "High Dose\\\\\nNo Civics", "All\\\\\nHigh Dose",
-                         "All\\\\\nCommunes"),
-          .type = "html",
-          .title = "Replication of Table 3")
-          }
 
 }
