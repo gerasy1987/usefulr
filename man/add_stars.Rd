@@ -7,7 +7,7 @@
 add_stars(
   p.value,
   type = "html",
-  levels = c(`***` = 0.001, `**` = 0.01, `*` = 0.05)
+  sign_levels = c(`***` = 0.01, `**` = 0.05, `*` = 0.1)
 )
 }
 \arguments{
@@ -15,7 +15,7 @@ add_stars(
 
 \item{type}{Output type. Can be "latex", "html" or "markdown"}
 
-\item{levels}{Vector of significance levels from strictest to less strict}
+\item{sign_levels}{Vector of significance levels from strictest to less strict}
 }
 \value{
 RETURN_DESCRIPTION

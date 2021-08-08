@@ -26,7 +26,7 @@ listn <- function(...) {
 #'
 #' @param p.value Numeric vector of p-values.
 #' @param type Output type. Can be "latex", "html" or "markdown"
-#' @param levels Vector of significance levels from strictest to less strict
+#' @param sign_levels Vector of significance levels from strictest to less strict
 #'
 #' @return RETURN_DESCRIPTION
 #' @examples
@@ -37,17 +37,17 @@ listn <- function(...) {
 add_stars <- function(
   p.value,
   type = "html",
-  levels = c("***" = .001, "**" = .01, "*" = .05)) {
+  sign_levels = c("***" = .01, "**" = .05, "*" = .1)) {
 
   out <- ""
 
   if (type == "latex") {
-    for (lvl in seq_along(levels)) {
-      if (p.value <= levels[lvl]) out <- paste0("$^{", names(levels)[lvl], "}$")
+    for (lvl in seq_along(sign_levels)) {
+      if (p.value <= sign_levels[lvl]) out <- paste0("$^{", names(sign_levels)[lvl], "}$")
     }
   } else {
-    for (lvl in seq_along(levels)) {
-      if (p.value <= levels[lvl]) out <- names(levels)[lvl]
+    for (lvl in seq_along(sign_levels)) {
+      if (p.value <= sign_levels[lvl]) out <- names(sign_levels)[lvl]
     }
   }
 
