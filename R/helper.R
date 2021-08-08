@@ -24,26 +24,34 @@ listn <- function(...) {
 #'
 #' FUNCTION_DESCRIPTION
 #'
-#' @param p.value DESCRIPTION.
+#' @param p.value Numeric vector of p-values.
+#' @param type Output type. Can be "latex", "html" or "markdown"
+#' @param levels Vector of significance levels from strictest to less strict
 #'
 #' @return RETURN_DESCRIPTION
 #' @examples
 #' # ADD_EXAMPLES_HERE
-add_stars <- function(p.value, type = "html") {
+#'
+#' @import dplyr
+#'
+add_stars <- function(
+  p.value,
+  type = "html",
+  levels = c("***" = .001, "**" = .01, "*" = .05)) {
+
+  out <- ""
 
   if (type == "latex") {
-    return(
-      ifelse(p.value <= 0.01, "$^{***}$",
-             ifelse(p.value <= 0.05, "$^{**}$",
-                    ifelse(p.value <= 0.1,"$^{*}$", "")))
-    )
+    for (lvl in seq_along(levels)) {
+      if (p.value <= levels[lvl]) out <- paste0("$^{", names(levels)[lvl], "}$")
+    }
   } else {
-    return(
-      ifelse(p.value <= 0.01, "***",
-             ifelse(p.value <= 0.05, "**",
-                    ifelse(p.value <= 0.1,"*", "")))
-    )
+    for (lvl in seq_along(levels)) {
+      if (p.value <= levels[lvl]) out <- names(levels)[lvl]
+    }
   }
+
+  return(out)
 
 }
 

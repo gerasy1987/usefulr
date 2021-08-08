@@ -17,7 +17,7 @@ table_fun(
   .group_means = NULL,
   .hypotheses = NULL,
   .add_rows = NULL,
-  .add_stars = FALSE,
+  .add_stars = TRUE,
   .add_modelspec = FALSE,
   .round_digits = 3
 )

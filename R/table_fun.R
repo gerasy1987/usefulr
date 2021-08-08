@@ -38,9 +38,9 @@
 #'           }
 #'
 #' @import knitr
+#' @import dplyr
 #' @importFrom  kableExtra linebreak
 #' @export
-
 table_fun <- function(.table_list,
                       .row_names,
                       .col_names,
@@ -53,7 +53,7 @@ table_fun <- function(.table_list,
                       .group_means = NULL,
                       .hypotheses = NULL,
                       .add_rows = NULL,
-                      .add_stars = TRUE,
+                      .add_stars = NULL,
                       .add_modelspec = FALSE,
                       .round_digits = 3 #,
                       # .latex_colwidth = getOption("usefulr.latex_colwidth",
@@ -131,19 +131,19 @@ table_fun <- function(.table_list,
 
   .table_list["estimates", ] <-
     lapply(.table_list["estimates", ], function(x) {
-      if (.add_stars) {
+      if (!is.null(.add_stars)) {
         x <-
           dplyr::mutate(x,
                         printout =
                           ifelse(is.nan(estimate), "-- [--]",
                                  ifelse(is.na(std.error),
                                         paste0(fround(estimate, digits = .round_digits),
-                                               add_stars(p.value, type = .type),
+                                               add_stars(p.value, type = .type, levels = .add_stars),
                                                " [", fround(p.value, digits = .round_digits), "]"),
                                         paste0(fround(estimate, digits = .round_digits),
-                                               add_stars(p.value, type = .type),
+                                               add_stars(p.value, type = .type, levels = .add_stars),
                                                " [", fround(std.error, digits = .round_digits), "]"))))
-      } else if (!.add_stars) {
+      } else if (is.null(.add_stars)) {
         x <-
           dplyr::mutate(x,
                         printout =

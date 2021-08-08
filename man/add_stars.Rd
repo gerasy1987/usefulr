@@ -4,10 +4,18 @@
 \alias{add_stars}
 \title{FUNCTION_TITLE}
 \usage{
-add_stars(p.value, type = "html")
+add_stars(
+  p.value,
+  type = "html",
+  levels = c(`***` = 0.001, `**` = 0.01, `*` = 0.05)
+)
 }
 \arguments{
-\item{p.value}{DESCRIPTION.}
+\item{p.value}{Numeric vector of p-values.}
+
+\item{type}{Output type. Can be "latex", "html" or "markdown"}
+
+\item{levels}{Vector of significance levels from strictest to less strict}
 }
 \value{
 RETURN_DESCRIPTION
@@ -17,4 +25,5 @@ FUNCTION_DESCRIPTION
 }
 \examples{
 # ADD_EXAMPLES_HERE
+
 }
