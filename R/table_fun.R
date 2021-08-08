@@ -174,6 +174,8 @@ table_fun <- function(.table_list,
               lapply(X = .table_list["model_spec", ],
                      FUN = function(x) x[c(1, 3:5)]))),
       c("Model", "FE", "Clustered SE", "IPW"))
+  } else {
+    .spec_tab <- NULL
   }
 
 
