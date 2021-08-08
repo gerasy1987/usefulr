@@ -53,7 +53,7 @@ table_fun <- function(.table_list,
                       .group_means = NULL,
                       .hypotheses = NULL,
                       .add_rows = NULL,
-                      .add_stars = FALSE,
+                      .add_stars = TRUE,
                       .add_modelspec = FALSE,
                       .round_digits = 3 #,
                       # .latex_colwidth = getOption("usefulr.latex_colwidth",
@@ -86,7 +86,7 @@ table_fun <- function(.table_list,
 
     .table_list <-
       matrix(.table_list,
-             nrow = length(.table_list),
+             nrow = length(.table_list), byrow = FALSE,
              dimnames = list(names(.table_list), NULL))
 
     # if (length(.col_names) > 1)
@@ -184,13 +184,15 @@ table_fun <- function(.table_list,
   #     FUN = function(x) x[1:3])))
 
   if (.type == "latex") {
-    .est_tab <- apply(
-      X = .est_tab,
+    .est_tab <- tapply(
+      X = .est_tab, INDEX = col(.est_tab),
       MARGIN = 2,
       FUN = function(x) {
-        kableExtra::linebreak(gsub(x, pattern = " \\[", replacement = "\\\n["),
-                              align = "c", linebreaker = "\n")}
+        as.matrix(kableExtra::linebreak(gsub(x, pattern = " \\[", replacement = "\\\n["),
+                              align = "c", linebreaker = "\n"))}
     )
+
+
   }
 
   if (!is.null(.add_rows)) {
@@ -206,17 +208,13 @@ table_fun <- function(.table_list,
   }
 
   .out_tab <- unname(rbind(
-    .est_tab,
-    .stat_tab, .group_means, .hypotheses,
-    .spec_tab,
-    .add_rows))
+    .est_tab, .stat_tab,
+    .group_means, .hypotheses, .spec_tab, .add_rows))
 
   .row_names <- c(
     .row_names,
-    rownames(.group_means),
-    rownames(.hypotheses),
-    rownames(.spec_tab),
-    rownames(.add_rows))
+    rownames(.group_means), rownames(.hypotheses),
+    rownames(.spec_tab), rownames(.add_rows))
 
   # }
 
