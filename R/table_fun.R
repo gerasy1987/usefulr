@@ -125,14 +125,14 @@ table_fun <- function(.table_list,
                         printout =
                           ifelse(is.nan(estimate), "-- [--]",
                                  ifelse(is.na(std.error),
-                                        paste0(fround(estimate, digits = .round_digits),
+                                        paste0("$", fround(estimate, digits = .round_digits),
                                                add_stars(p.value, type = .type,
                                                          sign_levels = .add_stars),
-                                               " [", fround(p.value, digits = .round_digits), "]"),
-                                        paste0(fround(estimate, digits = .round_digits),
+                                               "$ $[", fround(p.value, digits = .round_digits), "]$"),
+                                        paste0("$", fround(estimate, digits = .round_digits),
                                                add_stars(p.value, type = .type,
                                                          sign_levels = .add_stars),
-                                               " [", fround(std.error, digits = .round_digits), "]"))))
+                                               "$ $[", fround(std.error, digits = .round_digits), "]$"))))
       } else if (is.null(.add_stars)) {
         x <-
           dplyr::mutate(x,

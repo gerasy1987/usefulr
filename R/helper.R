@@ -44,7 +44,7 @@ add_stars <- function(
     for (lvl in seq_along(sign_levels)) {
       out <- dplyr::if_else(
         p.value <= sign_levels[lvl],
-        true = paste0("$^{", names(sign_levels)[lvl], "}$"),
+        true = paste0("^{", names(sign_levels)[lvl], "}"),
         false = out)
     }
   } else {
