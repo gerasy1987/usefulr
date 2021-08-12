@@ -98,3 +98,52 @@ fix_join <- function(.data) {
   names(.data) <- gsub(pattern = ".y$", replacement = "_merged", x = names(.data))
   return(.data)
 }
+
+
+#' LaTeX Helper to Create a Cell Linebreak by Symbol Length (Excluding Math)
+#'
+#' @param x DESCRIPTION.
+#' @param align DESCRIPTION.
+#' @param double_escape DESCRIPTION.
+#' @param symbol_width DESCRIPTION.
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#'
+#' @import dplyr stringr
+linebreak2 <- function(
+  x, align = c("l", "c", "r"), double_escape = F, symbol_width = 11
+) {
+  if (is.numeric(x) | is.logical(x)) return(x)
+
+  x_start <- stringr::str_length(str_extract(pattern = "\\$.*\\$ ", string = x))
+
+  word_breaks <-
+    lapply(
+      stringr::str_locate_all(pattern = ' ', gsub("\\$.*\\$ ", "", as.character(x))),
+      function(stri) {
+        stri <- unname(stri[,1])
+        stri[which((stri %/% symbol_width) != lag(stri %/% symbol_width))]
+      })
+
+  for (i in seq_along(x)) {
+    if (length(word_breaks[[i]]) > 0) {
+      strintr::str_sub(x[i],
+                       start = x_start[i] + word_breaks[[i]],
+                       end = x_start[i] + word_breaks[[i]]) <- ";;;"
+    }
+  }
+
+  align <- vapply(align, match.arg, "a", choices = c("l", "c", "r"))
+  if (double_escape) {
+    ifelse(strintr::str_detect(x, ";;;"),
+           paste0("\\\\makecell[", align, "]{", strintr::str_replace_all(x, ";;;", "\\\\\\\\\\\\\\\\"), "}"),
+           x)
+  } else {
+    ifelse(strintr::str_detect(x, ";;;"),
+           paste0("\\makecell[", align, "]{", strintr::str_replace_all(x, ";;;", "\\\\\\\\"), "}"),
+           x)
+  }
+}
