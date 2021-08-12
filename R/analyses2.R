@@ -15,7 +15,6 @@
 #' @param estimator_name Character string giving name of the estimator used
 #' @param treat_only Logical vector of length 1, specifying whether only \code{treat} estimates should be reported. Defaults to \code{FALSE}.
 #' @param status Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.
-#' @param stars Logical. If \code{FALSE} no stars are passed to printout.
 #' @param round_digits Integer. How many decimal points to round to in the output.
 #' @param return_df If \code{TRUE} dataframe used for estimation will be returned.
 #' @param ... Other parameters used in estimate function
@@ -28,7 +27,7 @@
 #' @export
 
 
-analyses2 <- function(dv,
+make_analyses <- function(dv,
                       treat,
                       covs = NULL,
                       heterogenous = NULL,
@@ -43,7 +42,7 @@ analyses2 <- function(dv,
                       estimator_name,
                       treat_only = FALSE,
                       status = NULL,
-                      stars = FALSE,
+                      # stars = FALSE,
                       round_digits = 3,
                       return_df = FALSE,
                       ...) {
@@ -149,41 +148,41 @@ analyses2 <- function(dv,
   estout$estimates <- estout$estimates[!grepl(pattern = "Intercept", x = estout$estimates$term, fixed = TRUE),]
   if (treat_only) estout$estimates <- estout$estimates[grepl(pattern = paste(paste0(treat), collapse = "|"), x = estout$estimates$term),]
 
-  # add stars and printout column
-  if (stars) {
-    out <-
-      dplyr::mutate(estout$estimates,
-                    printout =
-                      ifelse(is.nan(estimate), "-- [--]",
-                             ifelse(is.na(std.error),
-                                    paste0(fround(estimate, digits = round_digits),
-                                           add_stars(p.value = p.value),
-                                           " [", fround(p.value, digits = round_digits), "]"),
-                                    paste0(fround(estimate, digits = round_digits),
-                                           add_stars(p.value = p.value),
-                                           " [", fround(std.error, digits = round_digits), "]"))),
-                    estimate = round(estimate, digits = round_digits),
-                    std.error = round(std.error, digits = round_digits),
-                    p.value = round(p.value, digits = round_digits))
-  } else if (!stars) {
-    out <-
-      dplyr::mutate(estout$estimates,
-                    printout =
-                      ifelse(is.nan(estimate), "-- [--]",
-                             ifelse(is.na(std.error),
-                                    paste0(fround(estimate, digits = round_digits),
-                                           " [", fround(p.value, digits = round_digits), "]"),
-                                    paste0(fround(estimate, digits = round_digits),
-                                           " [", fround(std.error, digits = round_digits), "]"))),
-                    estimate = round(estimate, digits = round_digits),
-                    std.error = round(std.error, digits = round_digits),
-                    p.value = round(p.value, digits = round_digits))
-  }
+  # # add stars and printout column
+  # if (stars) {
+  #   out <-
+  #     dplyr::mutate(estout$estimates,
+  #                   printout =
+  #                     ifelse(is.nan(estimate), "-- [--]",
+  #                            ifelse(is.na(std.error),
+  #                                   paste0(fround(estimate, digits = round_digits),
+  #                                          add_stars(p.value = p.value),
+  #                                          " [", fround(p.value, digits = round_digits), "]"),
+  #                                   paste0(fround(estimate, digits = round_digits),
+  #                                          add_stars(p.value = p.value),
+  #                                          " [", fround(std.error, digits = round_digits), "]"))),
+  #                   estimate = round(estimate, digits = round_digits),
+  #                   std.error = round(std.error, digits = round_digits),
+  #                   p.value = round(p.value, digits = round_digits))
+  # } else if (!stars) {
+  #   out <-
+  #     dplyr::mutate(estout$estimates,
+  #                   printout =
+  #                     ifelse(is.nan(estimate), "-- [--]",
+  #                            ifelse(is.na(std.error),
+  #                                   paste0(fround(estimate, digits = round_digits),
+  #                                          " [", fround(p.value, digits = round_digits), "]"),
+  #                                   paste0(fround(estimate, digits = round_digits),
+  #                                          " [", fround(std.error, digits = round_digits), "]"))),
+  #                   estimate = round(estimate, digits = round_digits),
+  #                   std.error = round(std.error, digits = round_digits),
+  #                   p.value = round(p.value, digits = round_digits))
+  # }
 
 
 
-  out <- dplyr::select(.data = out,
-                       term, estimate, std.error, printout, p.value)
+  out <- dplyr::select(.data = estout$estimates,
+                       term, estimate, std.error, p.value)
 
   list_out <-
     list(estimates = out,
