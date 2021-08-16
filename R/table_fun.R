@@ -127,8 +127,8 @@ make_table <- function(.table_list,
             .table_list["estimates", ][[i]],
             !!paste0("printest_", i) :=
               dplyr::if_else(is.nan(estimate), "--",
-                             paste0("$",
-                                    fround(estimate, digits = .round_digits),
+                             paste0(fround(estimate, digits = .round_digits),
+                                    "$",
                                     add_stars(p.value, type = .type, sign_levels = .add_stars),
                                     "$")),
             !!paste0("printse_", i) :=
