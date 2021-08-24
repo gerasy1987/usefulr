@@ -514,7 +514,7 @@ analyses <- function(DV,
 print.analyses_list <- function(analyses_list) {
   requireNamespace("knitr", quietly = TRUE)
   cat("Estimates:")
-  print(knitr::kable(analyses_list$estimates[,c("term","printout","p.value")],
+  print(knitr::kable(analyses_list$estimates[,c("term","std.error","p.value")],
                      format = "pandoc", align = "lll"))
   cat("\nEstimation formula:\n")
   cat(analyses_list$internals$estfun_formula, "\n")
