@@ -223,3 +223,15 @@ make_analyses <- function(dv,
                    class = c("analyses_list", "list")) )
 
 }
+
+#' @export
+print.analyses_list <- function(analyses_list) {
+  requireNamespace("knitr", quietly = TRUE)
+  cat("Estimates:")
+  print(knitr::kable(analyses_list$estimates[,c("term", "estimate", "std.error","p.value")],
+                     format = "pandoc", align = "llll"))
+  cat("\nEstimation formula:\n")
+  cat(analyses_list$internals$estfun_formula, "\n")
+  cat("\nSummary:\nAdj. R2 =", analyses_list$stat[1], ", N =", analyses_list$stat[2],"\n")
+  invisible(analyses_list)
+}
