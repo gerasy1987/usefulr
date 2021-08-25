@@ -52,7 +52,7 @@ make_analyses(
 
 \item{estimator_name}{Character string giving name of the estimator used}
 
-\item{treat_only}{Logical vector of length 1, specifying whether only \code{treat} estimates should be reported. Defaults to \code{FALSE}.}
+\item{treat_only}{TRUE/FALSE specifying whether only estimates directly related to \code{treat} should be reported (including heterogeneity variables). Defaults to \code{FALSE}.}
 
 \item{status}{Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.}
 

@@ -13,7 +13,7 @@
 #' @param data Data frame which contains all the relevant variables.
 #' @param estimator Function that takes all arguments above, \code{fit_formula} and \code{frame_df} as arguments and returns a tibble with the following columns: "term" (required), "estimate" (required), "std.error" (optional), "p.value" (required).
 #' @param estimator_name Character string giving name of the estimator used
-#' @param treat_only Logical vector of length 1, specifying whether only \code{treat} estimates should be reported. Defaults to \code{FALSE}.
+#' @param treat_only TRUE/FALSE specifying whether only estimates directly related to \code{treat} should be reported (including heterogeneity variables). Defaults to \code{FALSE}.
 #' @param status Logical vector of length 3, specifying whether the model was pre-(R)egistered, run in (S)cript and reported in (P)aper respectively.
 #' @param round_digits Integer. How many decimal points to round to in the output.
 #' @param return_df If \code{TRUE} dataframe used for estimation will be returned.
@@ -27,25 +27,26 @@
 #' @export
 
 
-make_analyses <- function(dv,
-                      treat,
-                      covs = NULL,
-                      heterogenous = NULL,
-                      FE = NULL,
-                      IPW = NULL,
-                      IV_list = NULL,
-                      cluster = NULL,
-                      robust = is.null(cluster),
-                      data,
-                      subset = NULL,
-                      estimator,
-                      estimator_name,
-                      treat_only = FALSE,
-                      status = NULL,
-                      # stars = FALSE,
-                      round_digits = 3,
-                      return_df = FALSE,
-                      ...) {
+make_analyses <- function(
+  dv,
+  treat,
+  covs = NULL,
+  heterogenous = NULL,
+  FE = NULL,
+  IPW = NULL,
+  IV_list = NULL,
+  cluster = NULL,
+  robust = is.null(cluster),
+  data,
+  subset = NULL,
+  estimator,
+  estimator_name,
+  treat_only = FALSE,
+  status = NULL,
+  # stars = FALSE,
+  round_digits = 3,
+  return_df = FALSE,
+  ...) {
 
   frame_formula <-
     stats::as.formula(paste(dv, "~", paste(unique(c(treat, covs, FE, cluster, IPW,
@@ -146,7 +147,7 @@ make_analyses <- function(dv,
 
   # cleanup estout$estimates
   estout$estimates <- estout$estimates[!grepl(pattern = "Intercept", x = estout$estimates$term, fixed = TRUE),]
-  if (treat_only) estout$estimates <- estout$estimates[grepl(pattern = paste(paste0(treat), collapse = "|"), x = estout$estimates$term),]
+  if (treat_only) estout$estimates <- estout$estimates[grepl(pattern = paste(c(treat, heterogenous), collapse = "|"), x = estout$estimates$term),]
 
   # # add stars and printout column
   # if (stars) {
