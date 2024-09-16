@@ -68,6 +68,3 @@ List of three objects. \code{estimates} is estimates from the model and correspo
 \description{
 Estimation Function
 }
-\examples{
-
-}

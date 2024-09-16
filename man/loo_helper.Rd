@@ -8,8 +8,8 @@ loo_helper(
   data,
   var,
   loo_n = 1,
-  loo_fun = function(dat) estimatr::tidy(estimatr::lm_robust(data = dat, formula = mpg
-    ~ 1)),
+  loo_fun = function(dat) estimatr::tidy(estimatr::lm_robust(data = dat, formula = mpg ~
+    1)),
   parallel = FALSE
 )
 }
@@ -24,12 +24,6 @@ loo_helper(
 
 \item{parallel}{whether to use parallel in \code{plyr::alply}}
 }
-\value{
-
-}
 \description{
 Leave-m-out estimation
-}
-\examples{
-
 }

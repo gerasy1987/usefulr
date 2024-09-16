@@ -69,6 +69,3 @@ Markdown or LaTeX table of estimated models.
 \description{
 Generate markdown or LaTeX table from list of analyses2() function outputs.
 }
-\examples{
-
-}

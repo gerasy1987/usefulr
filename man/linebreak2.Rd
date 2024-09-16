@@ -15,12 +15,6 @@ linebreak2(x, align = c("l", "c", "r"), double_escape = F, symbol_width = 11)
 
 \item{symbol_width}{DESCRIPTION.}
 }
-\value{
-
-}
 \description{
 LaTeX Helper to Create a Cell Linebreak by Symbol Length (Excluding Math)
-}
-\examples{
-
 }

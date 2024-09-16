@@ -21,6 +21,3 @@ RETURN_DESCRIPTION
 \description{
 FUNCTION_DESCRIPTION
 }
-\examples{
-
-}
